@@ -1,7 +1,7 @@
 /**
  * Created by kalk on 6/20/17.
  */
-class GameController {
+class GameDAO {
 
     fun addGame(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean) {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
