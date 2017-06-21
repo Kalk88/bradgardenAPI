@@ -3,16 +3,16 @@
  */
 class GameDAO(val connection:String)  {
 
-    fun addGame(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
+    fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
         require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
     }
 
-    fun updateGame(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Int {}
+    fun update(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Int {}
 
-    fun getGames(from:Int = 0, amount: Int = 0): Array<Game>{}
+    fun get(from:Int = 0, amount: Int = 0): Array<Game>{}
 
-    fun removeGame(id: Int): Boolean{}
+    fun remove(id: Int): Boolean{}
 }
 
 

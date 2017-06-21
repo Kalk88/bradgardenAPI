@@ -14,17 +14,23 @@ const val GAMES = "/api/games"
 const val GAMESID = "/api/game/:id"
 const val SESSIONS = "/api/sessions"
 const val SESSIONSID ="/api/sessions/:id"
+
 fun main(args: Array<String>) {
+    val conn = "CONNECTION URL HERE"
     val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
     val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
-    port(8080)
+    val memberDAO = MemberDAO(conn)
+    val gameDAO = GameDAO(conn)
+    val sessionDAO = SessionDAO(conn)
     val mapper = ObjectMapper().registerModule(KotlinModule())
+    port(8080)
+
     get(ENDPOINTS) {req, res -> publicEndpoints}
 
     post(MEMBERS) {req, res ->
         try {
             val member = mapper.readValue<Member>(req.body())
-           MemberDAO().addMember(member.firstName, member.lastName)
+           memberDAO.add(member.firstName, member.lastName)
         } catch (e: Exception) {
            throw APIException("Error")
         }

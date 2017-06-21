@@ -3,20 +3,20 @@
  */
 class MemberDAO(val connection:String) {
 
-    fun addMember(firstName: String, lastName: String): Int {
+    fun add(firstName: String, lastName: String): Int {
         validateName(firstName, lastName)
 
     }
 
-    fun updateMember(firstName: String, lastName: String, id: Int): Int {
+    fun update(firstName: String, lastName: String, id: Int): Int {
         validateName(firstName, lastName)
     }
 
-    fun getMembers(from: Int = 0, amount: Int = 0): Array<Member> {}
+    fun get(from: Int = 0, amount: Int = 0): Array<Member> {}
 
-    fun getDetailedMember(id: Int): Member {}
+    fun getDetailed(id: Int): Member {}
 
-    fun deleteMember(id: Int): Boolean {}
+    fun delete(id: Int): Boolean {}
 
     private fun validateName(firstName: String, lastName: String) {
         val numbers = Regex(".*\\d+.*")
