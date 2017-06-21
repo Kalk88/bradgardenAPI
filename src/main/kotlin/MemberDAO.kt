@@ -1,19 +1,22 @@
 /**
  * Created by kalk on 6/20/17.
  */
-class MemberDAO {
+class MemberDAO(val connection:String) {
 
-    fun addMember(firstName: String, lastName: String) {
+    fun addMember(firstName: String, lastName: String): Int {
+        validateName(firstName, lastName)
+
+    }
+
+    fun updateMember(firstName: String, lastName: String, id: Int): Int {
         validateName(firstName, lastName)
     }
 
-    fun updateMember(firstName: String, lastName: String, id: Int) {}
+    fun getMembers(from: Int = 0, amount: Int = 0): Array<Member> {}
 
-    fun getMembers(from: Int = 0, amount: Int = 0) {}
+    fun getDetailedMember(id: Int): Member {}
 
-    fun getDetailedMember(id: Int) {}
-
-    fun deleteMember(id: Int) {}
+    fun deleteMember(id: Int): Boolean {}
 
     private fun validateName(firstName: String, lastName: String) {
         val numbers = Regex(".*\\d+.*")

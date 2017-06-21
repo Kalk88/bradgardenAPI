@@ -3,17 +3,17 @@ import java.util.*
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO {
+class SessionDAO(val connection:String)  {
 
-    fun addSession(gameID: Int, date: String, winners: Array<Int>, losers: Array<Int>, traitors: Array<Int>) {
-
-    }
-
-    fun getSessions(from:Int = 0, numOf:Int = 0) {
+    fun addSession(gameID: Int, date: String, winners: Array<Int>, losers: Array<Int>, traitors: Array<Int>): Int {
 
     }
 
-    fun removeSession(id: Int) {}
+    fun getSessions(from:Int = 0, numOf:Int = 0): Array<Session> {
+
+    }
+
+    fun removeSession(id: Int): Boolean {}
 
 }
 
