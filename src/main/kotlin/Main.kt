@@ -37,7 +37,8 @@ fun main(args: Array<String>) {
 
     }
     get(MEMBERS) {req, res -> "[{\"id\": 1,\"firstName\": \"Jens\",\"lastName\": \"Johnny\" }]"}
-    put(MEMBERSID) {req, res -> }
+    get(MEMBERSID) {req, res -> memberDAO.getDetailed(0)}
+    put(MEMBERSID) {req, res ->  }
     delete(MEMBERSID) {req, res ->}
 
     post(GAMES) {req, res ->}
@@ -46,7 +47,7 @@ fun main(args: Array<String>) {
     delete(GAMESID) {req, res ->}
 
     post(SESSIONS) {req, res -> dtf.format(LocalDateTime.now())}
-    get(SESSIONS) {req, res -> throw APIException("fuck")}
+    get(SESSIONS) {req, res -> }
     get(SESSIONSID) {req, res -> }
     delete(SESSIONSID) {req, res ->}
 
