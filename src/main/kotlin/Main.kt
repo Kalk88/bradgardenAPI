@@ -47,7 +47,8 @@ fun main(args: Array<String>) {
         } catch (e: NumberFormatException) {
             throw APIException("${e.message} is not a valid member id")
         }
-        memberDAO.getDetailed(id)
+        res.type("application/json")
+        mapper.writeValueAsString(memberDAO.getDetailed(id))
     }
 
     put(MEMBERSID) {req, res ->  }

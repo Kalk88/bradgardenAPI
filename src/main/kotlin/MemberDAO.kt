@@ -31,7 +31,7 @@ class MemberDAO {
             rs = stmt.executeQuery()
             while (rs.next()) {
                 members.add(Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
-                                   wins = 0, winRatio = 0.0, timesTraitor =  0))
+                                   wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0))
             }
             closeConnection(con)
         } catch (e: Exception) {
@@ -48,10 +48,11 @@ class MemberDAO {
             val rs: ResultSet
             stmt.setInt(1, id)
             rs = stmt.executeQuery()
+            rs.next()
             member = Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
-                            wins = 0, winRatio = 0.0, timesTraitor =  0)
+                            wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0)
         } catch (e: Exception) {
-            throw APIException("error")
+            throw APIException("error: ${e.message}")
         }
         return  member
     }
@@ -67,5 +68,5 @@ class MemberDAO {
         require(lastName.length > 1) { "${lastName} is invalid, Name must be at least 2 characters." }
     }
 }
-data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int)
+data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int, val gamesPlayed: Int)
 
