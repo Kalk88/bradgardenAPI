@@ -6,10 +6,10 @@ import java.sql.SQLException
  */
 fun openConnection() : Connection {
     try {
-      val connection = DriverManager.getConnection("jdbc:postgresql://localhost/4532/bradgarden?user=postgres&password=postgres")
+      val connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bradgarden?user=postgres&password=postgres")
         return connection
     } catch (e: SQLException) {
-        throw APIException("database connection error")
+        throw APIException("database connection error" + e.message)
     }
 }
 

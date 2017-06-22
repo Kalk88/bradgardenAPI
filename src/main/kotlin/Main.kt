@@ -1,6 +1,7 @@
 import spark.Spark.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.*
+import java.lang.Integer.parseInt
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -19,9 +20,9 @@ fun main(args: Array<String>) {
     val conn = "CONNECTION URL HERE"
     val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
     val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
-    val memberDAO = MemberDAO(conn)
-    val gameDAO = GameDAO(conn)
-    val sessionDAO = SessionDAO(conn)
+    val memberDAO = MemberDAO()
+    val gameDAO = GameDAO()
+    val sessionDAO = SessionDAO()
     val mapper = ObjectMapper().registerModule(KotlinModule())
     port(8080)
 
@@ -36,8 +37,19 @@ fun main(args: Array<String>) {
         }
 
     }
-    get(MEMBERS) {req, res -> "[{\"id\": 1,\"firstName\": \"Jens\",\"lastName\": \"Johnny\" }]"}
-    get(MEMBERSID) {req, res -> memberDAO.getDetailed(0)}
+    get(MEMBERS) {req, res ->
+        res.type("application/json")
+        mapper.writeValueAsString(memberDAO.get(amount = 5))
+    }
+
+    get(MEMBERSID) {req, res ->
+        val id: Int = try { parseInt( req.params(":id"))
+        } catch (e: NumberFormatException) {
+            throw APIException("${e.message} is not a valid member id")
+        }
+        memberDAO.getDetailed(id)
+    }
+
     put(MEMBERSID) {req, res ->  }
     delete(MEMBERSID) {req, res ->}
 

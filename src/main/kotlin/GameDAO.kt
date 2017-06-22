@@ -1,7 +1,7 @@
 /**
  * Created by kalk on 6/20/17.
  */
-class GameDAO(val connection:String)  {
+class GameDAO  {
 
     fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}

@@ -2,7 +2,7 @@
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO(val connection:String)  {
+class SessionDAO  {
 
     fun add(gameID: Int, date: String, winners: Array<Int>, losers: Array<Int>, traitors: Array<Int>): Int {
         return 0
