@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://TBD.something
 
-# BrädgårdenStats
+# BrädgårdenAPI
 BrädgårdenStats is the key to finding who the best bord game player in Brädgården really is. 
 The API contains members & games in Brädgården and stats from bord game sessions.
 
@@ -69,12 +69,10 @@ This operation updates a member in the collection.
                  Authorization: 1234Example
     + Attributes(MemberWithId)
 
-+ Response 200 (application/json)
++ Response 204
     + Headers
 
                  Location: /api/members/id
-    + Attributes
-        + id: 1 (number) - Id of member.
 
 ### Remove Member [DELETE]
 This operation removes a member permanently from the collection. Use with caution as all stats will be lost.
@@ -129,20 +127,17 @@ This operation updates a game in the collection.
                  Authorization: 1234Example
     + Attributes (Game)
 
-+ Response 200 (application/json)
++ Response 204
     + Headers
 
                  Location: /api/members/id
-    + Attributes
-        + id: 1 (number) - Id of game.
-
 ### Remove Game [DELETE]
 +  Request
     + Headers
 
                  Authorization: 1234Example
 
-+ Response 204 (application/json)
++ Response 204 
 
 # Group Sessions
 ## Collection Sessions [/api/sessions]
