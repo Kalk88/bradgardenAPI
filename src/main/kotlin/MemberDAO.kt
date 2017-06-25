@@ -12,13 +12,11 @@ import java.util.LinkedList
 class MemberDAO {
 
     fun add(firstName: String, lastName: String): Int {
-        validateName(firstName, lastName)
         val con = openConnection()
         return 0
     }
 
     fun update(firstName: String, lastName: String, id: Int): Int {
-        validateName(firstName, lastName)
         return 0
     }
 
@@ -60,12 +58,14 @@ class MemberDAO {
     fun delete(id: Int): Boolean {
         return false
     }
+}
 
-    private fun validateName(firstName: String, lastName: String) {
-        val numbers = Regex(".*\\d+.*")
-        require(!firstName.matches(numbers) && !lastName.matches(numbers)) { "Invalid name." }
-        require(firstName.length > 1) { "${firstName} is invalid, must be at least 2 characters." }
-        require(lastName.length > 1) { "${lastName} is invalid, Name must be at least 2 characters." }
+data class lightMember(val firstName: String, val lastName: String) {
+    init {
+            val numbers = Regex(".*\\d+.*")
+            require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
+            require(firstName.length > 1) {"${firstName} is invalid, must be at least 2 characters."}
+            require(lastName.length > 1) {"${lastName} is invalid, Name must be at least 2 characters."}
     }
 }
 data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int, val gamesPlayed: Int)
