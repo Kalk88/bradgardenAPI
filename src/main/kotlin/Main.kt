@@ -37,10 +37,18 @@ fun main(args: Array<String>) {
         }
     }
     get(MEMBERS) {req, res ->
+        val from: String? = req.queryParams("pageStart")
+        val amount: String? = req.queryParams("pageSize")
         res.type(JSON)
-        val from = paramToInt(req.queryParams("pageStart"))
-        val amount = paramToInt(req.queryParams("pageSize"))
-        mapper.writeValueAsString(MemberDAO().get())
+        if(from != null && amount != null) {
+            mapper.writeValueAsString(MemberDAO().get(amount = paramToInt(amount), from = paramToInt(from)))
+        } else if (from == null && amount != null) {
+            mapper.writeValueAsString(MemberDAO().get(amount = paramToInt(amount)))
+        } else if (from != null && amount == null) {
+            mapper.writeValueAsString(MemberDAO().get(from = paramToInt(from)))
+        } else {
+            mapper.writeValueAsString(MemberDAO().get())
+        }
     }
 
     get(MEMBERSID) {req, res ->
