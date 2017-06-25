@@ -18,7 +18,6 @@ const val SESSIONSID ="/api/sessions/:id"
 const val JSON ="application/json"
 
 fun main(args: Array<String>) {
-    val conn = "CONNECTION URL HERE"
     val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
     val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
     val mapper = ObjectMapper().registerModule(KotlinModule())
@@ -29,12 +28,13 @@ fun main(args: Array<String>) {
     post(MEMBERS) {req, res ->
         try {
             val member = mapper.readValue<lightMember>(req.body())
+            var id = MemberDAO().add(member.firstName, member.lastName)
             res.type(JSON)
-          MemberDAO().add(member.firstName, member.lastName)
+            res.status(201)
+            "{\"id\": \"${id}\"}"
         } catch (e: Exception) {
-           throw APIException("Error")
+           throw APIException("Error: ${e.message}")
         }
-
     }
     get(MEMBERS) {req, res ->
         res.type(JSON)
@@ -61,14 +61,14 @@ fun main(args: Array<String>) {
           throw APIException("Error: ${e.message}")
         }
     }
-    delete(MEMBERSID) {req, res -> {
+    delete(MEMBERSID) {req, res ->
         try {
             val id = parseID(req.params(":id"))
             MemberDAO().delete(id)
         } catch (e: Exception) {
-        throw APIException("Error: ${e.message}")
+           throw APIException("Error: ${e.message}")
+        }
     }
-    }}
 
     post(GAMES) {req, res ->}
     get(GAMES) {req, res -> }
@@ -82,6 +82,7 @@ fun main(args: Array<String>) {
 
     exception(APIException::class.java, { exception, req, res ->
         res.status(400)
+        res.type(JSON)
         res.body(exception.message)
     })
 }
