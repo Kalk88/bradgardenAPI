@@ -1,10 +1,5 @@
-
-import java.sql.SQLException
+import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.PreparedStatement
-import java.util.LinkedList
-
-
 
 /**
  * Created by kalk on 6/20/17.
@@ -12,26 +7,54 @@ import java.util.LinkedList
 class MemberDAO {
 
     fun add(firstName: String, lastName: String): Int {
-        val con = openConnection()
-        return 0
+         var res: Int
+        try {
+            val con = openConnection()
+            val stmt = con.prepareStatement("insert into member (first_name, last_name) values (?,?) returning member_id")
+            stmt.setString(1,firstName)
+            stmt.setString(2,lastName)
+            stmt.executeQuery()
+            stmt.resultSet.next()
+            res = stmt.resultSet.getInt(1)
+            stmt.close()
+        } catch (e: Exception) {
+            println(e.message)
+            throw APIException("could not add member $firstName $lastName")
+        }
+        return res
     }
 
-    fun update(firstName: String, lastName: String, id: Int): Int {
-        return 0
+    fun update(firstName: String, lastName: String, id: Int): Boolean {
+        try {
+            val con = openConnection()
+            val stmt = con.prepareStatement("update Member set first_name = ?, last_name = ? where member_id = ?")
+            stmt.setString(1, firstName)
+            stmt.setString(2, lastName)
+            stmt.setInt(3, id)
+            stmt.execute()
+            stmt.close()
+            return true
+        } catch (e: Exception) {
+            println(e.message)
+            throw APIException("could not update member $firstName $lastName")
+        }
+        return false
     }
 
-    fun get(from: Int = 0, amount: Int = 0): ArrayList<Member> {
+    fun get(amount: Int = 100, from: Int = 0): ArrayList<Member> {
         val members = ArrayList<Member>()
         try {
             val con = openConnection()
-            val stmt = con.prepareStatement("select * from member")
+            val stmt = con.prepareStatement("select * from member limit ? offset ?")
+            stmt.setInt(1, amount)
+            stmt.setInt(2, from)
             val rs: ResultSet
             rs = stmt.executeQuery()
             while (rs.next()) {
                 members.add(Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
                                    wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0))
             }
-            closeConnection(con)
+            stmt.close()
         } catch (e: Exception) {
             println(e.message)
         }
@@ -49,6 +72,7 @@ class MemberDAO {
             rs.next()
             member = Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
                             wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0)
+            stmt.close()
         } catch (e: Exception) {
             throw APIException("error: ${e.message}")
         }
@@ -56,6 +80,16 @@ class MemberDAO {
     }
 
     fun delete(id: Int): Boolean {
+        try {
+            val con = openConnection()
+            val stmt = con.prepareStatement("DELETE from member WHERE member_id = ?")
+            stmt.setInt(1, id)
+            val res = stmt.execute()
+            stmt.close()
+            return true
+        } catch (e: Exception) {
+            throw APIException("${e.message}")
+        }
         return false
     }
 }
@@ -64,8 +98,8 @@ data class lightMember(val firstName: String, val lastName: String) {
     init {
             val numbers = Regex(".*\\d+.*")
             require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
-            require(firstName.length > 1) {"${firstName} is invalid, must be at least 2 characters."}
-            require(lastName.length > 1) {"${lastName} is invalid, Name must be at least 2 characters."}
+            require(firstName.length > 1) {"$firstName is invalid, must be at least 2 characters."}
+            require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
     }
 }
 data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int, val gamesPlayed: Int)
