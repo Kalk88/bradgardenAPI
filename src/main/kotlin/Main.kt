@@ -31,21 +31,23 @@ fun main(args: Array<String>) {
             var id = MemberDAO().add(member.firstName, member.lastName)
             res.type(JSON)
             res.status(201)
-            "{\"id\": \"${id}\"}"
+            toJSON("id", id)
         } catch (e: Exception) {
            throw APIException("Error: ${e.message}")
         }
     }
     get(MEMBERS) {req, res ->
         res.type(JSON)
-        mapper.writeValueAsString(MemberDAO().get(amount = 5))
+        val from = paramToInt(req.queryParams("pageStart"))
+        val amount = paramToInt(req.queryParams("pageSize"))
+        mapper.writeValueAsString(MemberDAO().get())
     }
 
     get(MEMBERSID) {req, res ->
         try {
-            val id = parseID(req.params(":id"))
+            val id = paramToInt(req.params(":id"))
             res.type(JSON)
-            mapper.writeValueAsString(MemberDAO().getDetailed(id)) }
+            mapper.writeValueAsString(MemberDAO().getDetailed(id))}
         catch (e: Exception) {
             throw APIException("Error: ${e.message}")
         }
@@ -53,17 +55,20 @@ fun main(args: Array<String>) {
 
     put(MEMBERSID) {req, res ->
         try {
-            val id = parseID(req.params(":id"))
+            val id = paramToInt(req.params(":id"))
             val member = mapper.readValue<lightMember>(req.body())
             res.type(JSON)
-            MemberDAO().update(member.firstName, member.lastName, id = id)
+            if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
+               res.status(204)
+            }
         } catch (e: Exception) {
           throw APIException("Error: ${e.message}")
         }
     }
     delete(MEMBERSID) {req, res ->
         try {
-            val id = parseID(req.params(":id"))
+            val id = paramToInt(req.params(":id"))
+            res.status(204)
             MemberDAO().delete(id)
         } catch (e: Exception) {
            throw APIException("Error: ${e.message}")
@@ -87,11 +92,16 @@ fun main(args: Array<String>) {
     })
 }
 
-fun parseID(reqID : String): Int {
-    val id: Int = try { parseInt(reqID)
+fun paramToInt(value : String): Int {
+    val id: Int = try { parseInt(value)
     } catch (e: NumberFormatException) {
-        throw APIException("${e.message} is not a valid member id")
+        throw APIException("${e.message} is not a valid number")
     }
     return id
 }
+
+fun toJSON(key: Any, value: Any): String {
+   return "{\"${key}\": \"${value}\"}"
+}
+
 class APIException(message: String) : Exception(message)
