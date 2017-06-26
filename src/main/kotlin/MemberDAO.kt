@@ -1,4 +1,3 @@
-import java.sql.Connection
 import java.sql.ResultSet
 
 /**
@@ -41,13 +40,13 @@ class MemberDAO {
         return false
     }
 
-    fun get(amount: Int = 100, from: Int = 0): ArrayList<Member> {
+    fun get(limit: Int = 100, offset: Int = 0): ArrayList<Member> {
         val members = ArrayList<Member>()
         try {
             val con = openConnection()
             val stmt = con.prepareStatement("select * from member limit ? offset ?")
-            stmt.setInt(1, amount)
-            stmt.setInt(2, from)
+            stmt.setInt(1, limit)
+            stmt.setInt(2, offset)
             val rs: ResultSet
             rs = stmt.executeQuery()
             while (rs.next()) {
@@ -61,10 +60,11 @@ class MemberDAO {
         return members
     }
 
-    fun getDetailed(id: Int): Member {
+    fun     getDetailed(id: Int): Member {
         val member: Member
         try {
             val con = openConnection()
+            // wins from count winner, gamesPlayed from count game_session, winRatio from wins/gamesPlayed, timesTraitor from count traitor...       name the counts?
             val stmt = con.prepareStatement("select * from member where member_id = ?")
             val rs: ResultSet
             stmt.setInt(1, id)
@@ -82,9 +82,9 @@ class MemberDAO {
     fun delete(id: Int): Boolean {
         try {
             val con = openConnection()
-            val stmt = con.prepareStatement("DELETE from member WHERE member_id = ?")
+            val stmt = con.prepareStatement("delete from member where member_id = ?")
             stmt.setInt(1, id)
-            val res = stmt.execute()
+            stmt.execute()
             stmt.close()
             return true
         } catch (e: Exception) {
