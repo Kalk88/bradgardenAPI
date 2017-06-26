@@ -15,7 +15,7 @@ class MemberDAO {
             stmt.executeQuery()
             stmt.resultSet.next()
             res = stmt.resultSet.getInt(1)
-            stmt.close()
+            con.close()
         } catch (e: Exception) {
             println(e.message)
             throw APIException("could not add member $firstName $lastName")
@@ -31,7 +31,7 @@ class MemberDAO {
             stmt.setString(2, lastName)
             stmt.setInt(3, id)
             stmt.execute()
-            stmt.close()
+            con.close()
             return true
         } catch (e: Exception) {
             println(e.message)
@@ -53,7 +53,7 @@ class MemberDAO {
                 members.add(Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
                                    wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0))
             }
-            stmt.close()
+            con.close()
         } catch (e: Exception) {
             println(e.message)
         }
@@ -72,7 +72,7 @@ class MemberDAO {
             rs.next()
             member = Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
                             wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0)
-            stmt.close()
+            con.close()
         } catch (e: Exception) {
             throw APIException("error: ${e.message}")
         }
@@ -85,7 +85,7 @@ class MemberDAO {
             val stmt = con.prepareStatement("delete from member where member_id = ?")
             stmt.setInt(1, id)
             stmt.execute()
-            stmt.close()
+            con.close()
             return true
         } catch (e: Exception) {
             throw APIException("${e.message}")

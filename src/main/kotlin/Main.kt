@@ -3,7 +3,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 /**
  * Created by kalk on 5/29/17.
  */
@@ -35,6 +34,7 @@ fun main(args: Array<String>) {
            throw APIException("Error: ${e.message}")
         }
     }
+
     get(MEMBERS) {req, res ->
         try {
             val pageStart: Int? = req.queryParams("pageStart")?.toInt()
@@ -52,7 +52,6 @@ fun main(args: Array<String>) {
         } catch (e: Exception) {
             throw APIException("Error: ${e.message}")
         }
-
     }
 
     get(MEMBERSID) {req, res ->
@@ -77,6 +76,7 @@ fun main(args: Array<String>) {
           throw APIException("Error: ${e.message}")
         }
     }
+
     delete(MEMBERSID) {req, res ->
         try {
             val id = req.params(":id").toInt()
@@ -103,6 +103,7 @@ fun main(args: Array<String>) {
             throw APIException("Error: ${e.message}")
         }
     }
+
     get(SESSIONS) {req, res ->
         try {
             val pageStart: Int? = req.queryParams("pageStart")?.toInt()
@@ -121,7 +122,9 @@ fun main(args: Array<String>) {
             throw APIException("Error: ${e.message}")
         }
     }
+
     get(SESSIONSID) {req, res -> }
+
     delete(SESSIONSID) {req, res ->
         try {
             val id = req.params(":id").toInt()
