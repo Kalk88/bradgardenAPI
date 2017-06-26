@@ -1,7 +1,6 @@
 import spark.Spark.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.*
-import java.lang.Integer.parseInt
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -38,15 +37,15 @@ fun main(args: Array<String>) {
     }
     get(MEMBERS) {req, res ->
         try {
-            val pageStart: String? = req.queryParams("pageStart")
-            val pageSize: String? = req.queryParams("pageSize")
+            val pageStart: Int? = req.queryParams("pageStart")?.toInt()
+            val pageSize: Int? = req.queryParams("pageSize")?.toInt()
             res.type(JSON)
             if(pageStart != null && pageSize != null) {
-                mapper.writeValueAsString(MemberDAO().get(limit = paramToInt(pageSize), offset = paramToInt(pageStart)))
+                mapper.writeValueAsString(MemberDAO().get(limit = pageSize, offset = pageStart))
             } else if (pageStart == null && pageSize != null) {
-                mapper.writeValueAsString(MemberDAO().get(limit = paramToInt(pageSize)))
+                mapper.writeValueAsString(MemberDAO().get(limit = pageSize))
             } else if (pageStart != null && pageSize == null) {
-                mapper.writeValueAsString(MemberDAO().get(offset = paramToInt(pageStart)))
+                mapper.writeValueAsString(MemberDAO().get(offset = pageStart))
             } else {
                 mapper.writeValueAsString(MemberDAO().get())
             }
@@ -58,7 +57,7 @@ fun main(args: Array<String>) {
 
     get(MEMBERSID) {req, res ->
         try {
-            val id = paramToInt(req.params(":id"))
+            val id = req.params(":id").toInt()
             res.type(JSON)
             mapper.writeValueAsString(MemberDAO().getDetailed(id))}
         catch (e: Exception) {
@@ -68,7 +67,7 @@ fun main(args: Array<String>) {
 
     put(MEMBERSID) {req, res ->
         try {
-            val id = paramToInt(req.params(":id"))
+            val id = req.params(":id").toInt()
             val member = mapper.readValue<lightMember>(req.body())
             res.type(JSON)
             if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
@@ -80,7 +79,7 @@ fun main(args: Array<String>) {
     }
     delete(MEMBERSID) {req, res ->
         try {
-            val id = paramToInt(req.params(":id"))
+            val id = req.params(":id").toInt()
             res.status(204)
             MemberDAO().delete(id)
         } catch (e: Exception) {
@@ -106,15 +105,15 @@ fun main(args: Array<String>) {
     }
     get(SESSIONS) {req, res ->
         try {
-            val pageStart: String? = req.queryParams("pageStart")
-            val pageSize: String? = req.queryParams("pageSize")
+            val pageStart: Int? = req.queryParams("pageStart")?.toInt()
+            val pageSize: Int? = req.queryParams("pageSize")?.toInt()
             res.type(JSON)
             if(pageStart != null && pageSize != null) {
-                mapper.writeValueAsString(SessionDAO().get(limit = paramToInt(pageSize), offset = paramToInt(pageStart)))
+                mapper.writeValueAsString(SessionDAO().get(limit = pageSize, offset = pageStart))
             } else if (pageStart == null && pageSize != null) {
-                mapper.writeValueAsString(SessionDAO().get(limit = paramToInt(pageSize)))
+                mapper.writeValueAsString(SessionDAO().get(limit = pageSize))
             } else if (pageStart != null && pageSize == null) {
-                mapper.writeValueAsString(SessionDAO().get(offset = paramToInt(pageStart)))
+                mapper.writeValueAsString(SessionDAO().get(offset = pageStart))
             } else {
                 mapper.writeValueAsString(SessionDAO().get())
             }
@@ -125,7 +124,7 @@ fun main(args: Array<String>) {
     get(SESSIONSID) {req, res -> }
     delete(SESSIONSID) {req, res ->
         try {
-            val id = paramToInt(req.params(":id"))
+            val id = req.params(":id").toInt()
             res.status(204)
             SessionDAO().delete(id)
         } catch (e: Exception) {
@@ -138,14 +137,6 @@ fun main(args: Array<String>) {
         res.type(JSON)
         res.body(exception.message)
     })
-}
-
-fun paramToInt(value : String): Int {
-    val id: Int = try { parseInt(value)
-    } catch (e: NumberFormatException) {
-        throw APIException("${e.message} is not a valid number")
-    }
-    return id
 }
 
 fun toJSON(key: Any, value: Any): String {
