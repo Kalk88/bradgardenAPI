@@ -6,42 +6,49 @@ import java.sql.ResultSet
  */
 class SessionDAO  {
 
-    fun add(gameID: Int, date: String, winners: Array<Int>, losers: Array<Int>, traitors: Array<Int>): Int {
+    fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
        val sessionID: Int
         try {
             val con = openConnection()
-            val insertSession  = "insert into game_session (game, session_date) values ?, ? returning session_id"
-            val insertWinner = "insert into winner values ?, ?"
-            val insertLoser = "insert into loser values ?, ?"
-            val insertTraitor = "insert into traitor values ?, ?"
+            val insertSession  = "insert into game_session (game, session_date) values (?, ?) returning session_id"
+            val insertWinner = "insert into winner values (?, ?)"
+            val insertLoser = "insert into loser  values (?, ?)"
+            val insertTraitor = "insert into traitor values (?, ?)"
+            var win : PreparedStatement
+            var lose: PreparedStatement
+            var trait : PreparedStatement
             var stmt = con.prepareStatement(insertSession)
             stmt.setInt(1, gameID)
             stmt.setString(2, date)
             stmt.executeQuery()
             stmt.resultSet.next()
             sessionID = stmt.resultSet.getInt(1)
+            print(sessionID)
 
             for (winner in winners) {
-                stmt = con.prepareStatement(insertWinner)
-                stmt.setInt(1, sessionID)
-                stmt.setInt(2, winner)
-                stmt.executeQuery()
+                win = con.prepareStatement(insertWinner)
+                win.setInt(1, sessionID)
+                win.setInt(2, winner)
+                win.execute()
             }
+
             for (loser in losers) {
-                stmt = con.prepareStatement(insertLoser)
-                stmt.setInt(1, sessionID)
-                stmt.setInt(2, loser)
-                stmt.executeQuery()
+               lose = con.prepareStatement(insertLoser)
+                lose.setInt(1, sessionID)
+                lose.setInt(2, loser)
+                lose.execute()
             }
-            if(traitors.size > 0) {
+            if(traitors.isNotEmpty()) {
                 for (traitor in traitors) {
-                    stmt = con.prepareStatement(insertTraitor)
-                    stmt.setInt(1, sessionID)
-                    stmt.setInt(2, traitor)
-                    stmt.executeQuery()
+                    trait = con.prepareStatement(insertTraitor)
+                    trait.setInt(1, sessionID)
+                    trait.setInt(2, traitor)
+                    trait.execute()
                 }
             }
+            con.close()
         } catch (e: Exception) {
+            e.printStackTrace()
             throw APIException("${e.message}")
         }
         return sessionID
@@ -59,20 +66,20 @@ class SessionDAO  {
             while (rs.next()) {
                 sessions.add(lightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
             }
-            stmt.close()
+            con.close()
         } catch (e: Exception) {
             throw APIException("${e.message}")
         }
         return sessions
     }
 
-    fun remove(id: Int): Boolean {
+    fun delete(id: Int): Boolean {
         try {
             val con = openConnection()
             val stmt = con.prepareStatement("delete from game_session where session_id = ?")
             stmt.setInt(1, id)
             stmt.execute()
-            stmt.close()
+            con.close()
             return true
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -82,4 +89,5 @@ class SessionDAO  {
 }
 
 data class lightSession(val id: Int, val date: String, val gameID: Int)
+data class addSession(val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
 data class Session(val id: Int, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
