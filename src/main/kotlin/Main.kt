@@ -93,7 +93,17 @@ fun main(args: Array<String>) {
     put(GAMESID) {req, res ->}
     delete(GAMESID) {req, res ->}
 
-    post(SESSIONS) {req, res -> dtf.format(LocalDateTime.now())}
+    post(SESSIONS) {req, res ->
+        try {
+            val session = mapper.readValue<addSession>(req.body())
+            res.type(JSON)
+            val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
+                             losers = session.losers, traitors = session.traitors)
+        toJSON("id", id)
+        } catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
     get(SESSIONS) {req, res ->
         try {
             val pageStart: String? = req.queryParams("pageStart")
@@ -113,7 +123,15 @@ fun main(args: Array<String>) {
         }
     }
     get(SESSIONSID) {req, res -> }
-    delete(SESSIONSID) {req, res ->}
+    delete(SESSIONSID) {req, res ->
+        try {
+            val id = paramToInt(req.params(":id"))
+            res.status(204)
+            SessionDAO().delete(id)
+        } catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
 
     exception(APIException::class.java, { exception, req, res ->
         res.status(400)
