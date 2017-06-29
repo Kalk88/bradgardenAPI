@@ -40,8 +40,8 @@ class MemberDAO {
         return false
     }
 
-    fun get(limit: Int = 100, offset: Int = 0): ArrayList<Member> {
-        val members = ArrayList<Member>()
+    fun get(limit: Int = 100, offset: Int = 0): ArrayList<getMember> {
+        val members = ArrayList<getMember>()
         try {
             val con = openConnection()
             val stmt = con.prepareStatement("select * from member limit ? offset ?")
@@ -50,8 +50,7 @@ class MemberDAO {
             val rs: ResultSet
             rs = stmt.executeQuery()
             while (rs.next()) {
-                members.add(Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
-                                   wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0))
+                members.add(getMember(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3))
             }
             con.close()
         } catch (e: Exception) {
@@ -64,17 +63,25 @@ class MemberDAO {
         val member: Member
         try {
             val con = openConnection()
-            // wins from count winner, gamesPlayed from count game_session, winRatio from wins/gamesPlayed, timesTraitor from count traitor...       name the counts?
-            val stmt = con.prepareStatement("select * from member where member_id = ?")
+            val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor from
+                                                (select count(member) as wins from winner where member = ?) as w,
+                                                (select count(member) as losses from loser where member = ?) as l,
+                                                (select count(member) as timesTraitor from traitor where member = ?) as t,
+                                                (select first_name as first, last_name as last from member where member_id = ?) as m""")
             val rs: ResultSet
-            stmt.setInt(1, id)
+            for(i in 1..4)
+                stmt.setInt(i, id)
             rs = stmt.executeQuery()
             rs.next()
-            member = Member(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3),
-                            wins = 0, winRatio = 0.0, timesTraitor =  0, gamesPlayed = 0)
+            print(rs)
+            val wins = rs.getInt(3)
+            val losses = rs.getInt(4)
+            val total = wins + losses
+            member = Member(id = id, firstName = rs.getString(1), lastName = rs.getString(2),
+                            wins = wins, winRatio = wins.toDouble()/total, timesTraitor = rs.getInt(5), gamesPlayed = total) //add losses?
             con.close()
         } catch (e: Exception) {
-            throw APIException("error: ${e.message}")
+            throw APIException("${e.message}")
         }
         return  member
     }
@@ -102,5 +109,6 @@ data class lightMember(val firstName: String, val lastName: String) {
             require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
     }
 }
+data class getMember(val id: Int, val firstName: String, val lastName: String)
 data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int, val gamesPlayed: Int)
 
