@@ -50,7 +50,7 @@ class MemberDAO {
             val rs: ResultSet
             rs = stmt.executeQuery()
             while (rs.next()) {
-                members.add(getMember(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3))
+                members.add(getMember(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3)))
             }
             con.close()
         } catch (e: Exception) {
@@ -61,6 +61,7 @@ class MemberDAO {
 
     fun     getDetailed(id: Int): Member {
         val member: Member
+        val rs: ResultSet
         try {
             val con = openConnection()
             val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor from
@@ -68,17 +69,17 @@ class MemberDAO {
                                                 (select count(member) as losses from loser where member = ?) as l,
                                                 (select count(member) as timesTraitor from traitor where member = ?) as t,
                                                 (select first_name as first, last_name as last from member where member_id = ?) as m""")
-            val rs: ResultSet
+
             for(i in 1..4)
                 stmt.setInt(i, id)
             rs = stmt.executeQuery()
             rs.next()
-            print(rs)
             val wins = rs.getInt(3)
             val losses = rs.getInt(4)
             val total = wins + losses
             member = Member(id = id, firstName = rs.getString(1), lastName = rs.getString(2),
-                            wins = wins, winRatio = wins.toDouble()/total, timesTraitor = rs.getInt(5), gamesPlayed = total) //add losses?
+                            wins = wins, winRatio = wins.toDouble()/total, losses = losses,
+                            timesTraitor = rs.getInt(5), gamesPlayed = total) //add losses?
             con.close()
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -101,7 +102,7 @@ class MemberDAO {
     }
 }
 
-data class lightMember(val firstName: String, val lastName: String) {
+data class addMember(val firstName: String, val lastName: String) {
     init {
             val numbers = Regex(".*\\d+.*")
             require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
@@ -109,6 +110,10 @@ data class lightMember(val firstName: String, val lastName: String) {
             require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
     }
 }
+
 data class getMember(val id: Int, val firstName: String, val lastName: String)
-data class Member(val id: Int, val firstName: String, val lastName: String, val wins: Int, val winRatio: Double, val timesTraitor: Int, val gamesPlayed: Int)
+
+data class Member(val id: Int, val firstName: String, val lastName: String,
+                  val wins: Int, val winRatio: Double, val losses: Int,
+                  val timesTraitor: Int, val gamesPlayed: Int)
 
