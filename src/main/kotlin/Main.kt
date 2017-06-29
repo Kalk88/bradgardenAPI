@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 
     post(MEMBERS) {req, res ->
         try {
-            val member = mapper.readValue<lightMember>(req.body())
+            val member = mapper.readValue<addMember>(req.body())
             var id = MemberDAO().add(member.firstName, member.lastName)
             res.type(JSON)
             res.status(201)
@@ -67,7 +67,7 @@ fun main(args: Array<String>) {
     put(MEMBERSID) {req, res ->
         try {
             val id = req.params(":id").toInt()
-            val member = mapper.readValue<lightMember>(req.body())
+            val member = mapper.readValue<addMember>(req.body())
             res.type(JSON)
             if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
                res.status(204)
