@@ -87,10 +87,41 @@ fun main(args: Array<String>) {
         }
     }
 
-    post(GAMES) {req, res ->}
-    get(GAMES) {req, res -> }
-    put(GAMESID) {req, res ->}
-    delete(GAMESID) {req, res ->}
+    post(GAMES) {req, res ->
+        try {
+            val game = mapper.readValue<AddGame>(req.body())
+            var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
+            res.type(JSON)
+            res.status(201)
+            toJSON("id", id)
+        }catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
+
+    get(GAMES) {req, res ->
+        try {
+
+        }catch (e: Exception) {
+         throw APIException("Error: ${e.message}")
+        }
+    }
+
+    put(GAMESID) {req, res ->
+        try {
+
+        }catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
+
+    delete(GAMESID) {req, res ->
+        try {
+
+        }catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
 
     post(SESSIONS) {req, res ->
         try {

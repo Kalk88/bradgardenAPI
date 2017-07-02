@@ -19,8 +19,7 @@ class GameDAO  {
             println(e.message)
             throw APIException("could not add game $name")
         }
-        require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
-        require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
+
         return game_id
     }
 
@@ -74,6 +73,11 @@ class GameDAO  {
 }
 
 data class Game(val id: Int, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean)
-data class AddGame(val name: String, val maxNumOfPlayers: Int,val traitor: Boolean,val coop: Boolean)
+data class AddGame(val name: String, val maxNumOfPlayers: Int,val traitor: Boolean,val coop: Boolean){
+    init {
+        require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
+        require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
+    }
+}
 
 
