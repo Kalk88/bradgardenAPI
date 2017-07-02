@@ -1,5 +1,6 @@
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.util.ArrayList
 
 /**
  * Created by kalk on 6/20/17.
@@ -17,12 +18,12 @@ class SessionDAO  {
             var win : PreparedStatement
             var lose: PreparedStatement
             var trait : PreparedStatement
-            var stmt = con.prepareStatement(insertSession)
-            stmt.setInt(1, gameID)
-            stmt.setString(2, date)
-            stmt.executeQuery()
-            stmt.resultSet.next()
-            sessionID = stmt.resultSet.getInt(1)
+            var session = con.prepareStatement(insertSession)
+            session.setInt(1, gameID)
+            session.setString(2, date)
+            session.executeQuery()
+            session.resultSet.next()
+            sessionID = session.resultSet.getInt(1)
             print(sessionID)
 
             for (winner in winners) {
@@ -73,6 +74,53 @@ class SessionDAO  {
         return sessions
     }
 
+    fun getDetailed(id: Int): Session {
+        val getSession =  "select * from game_session where session_id=?"
+        val getWinners =  "select member from winner where game_session = ?"
+        val getLosers =   "select member from loser where game_session = ?"
+        val getTraitors = "select member from traitor where game_session = ?"
+        var win : PreparedStatement
+        var lose: PreparedStatement
+        var trait : PreparedStatement
+        var sess : PreparedStatement
+        try {
+            val con = openConnection()
+            sess = con.prepareStatement(getSession)
+            sess.setInt(1, id)
+            sess.executeQuery()
+            sess.resultSet.next()
+
+            win = con.prepareStatement(getWinners)
+            win.setInt(1, id)
+            win.executeQuery()
+            val w = ArrayList<Int>()
+            while (win.resultSet.next()) {
+                w.add(win.resultSet.getInt(1))
+            }
+
+            lose = con.prepareStatement(getLosers)
+            lose.setInt(1, id)
+            lose.executeQuery()
+            val l = ArrayList<Int>()
+            while (lose.resultSet.next()) {
+                l.add(lose.resultSet.getInt(1))
+            }
+
+            trait = con.prepareStatement(getTraitors)
+            trait.setInt(1, id)
+            trait.executeQuery()
+            val t = ArrayList<Int>()
+            while (trait.resultSet.next()) {
+                t.add(trait.resultSet.getInt(1))
+            }
+
+            return Session(id, gameID = sess.resultSet.getInt(2), date = sess.resultSet.getString(3),
+                            winners = w, losers = l, traitors = t)
+        } catch (e: Exception) {
+            throw APIException("${e.message}")
+        }
+    }
+
     fun delete(id: Int): Boolean {
         try {
             val con = openConnection()
@@ -84,7 +132,6 @@ class SessionDAO  {
         } catch (e: Exception) {
             throw APIException("${e.message}")
         }
-        return false
     }
 }
 

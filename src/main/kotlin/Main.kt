@@ -123,7 +123,15 @@ fun main(args: Array<String>) {
         }
     }
 
-    get(SESSIONSID) {req, res -> }
+    get(SESSIONSID) {req, res ->
+        try {
+            val id = req.params(":id").toInt()
+            res.type(JSON)
+            mapper.writeValueAsString(SessionDAO().getDetailed(id))}
+        catch (e: Exception) {
+            throw APIException("Error: ${e.message}")
+        }
+    }
 
     delete(SESSIONSID) {req, res ->
         try {

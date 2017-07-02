@@ -79,7 +79,7 @@ class MemberDAO {
             val total = wins + losses
             member = Member(id = id, firstName = rs.getString(1), lastName = rs.getString(2),
                             wins = wins, winRatio = wins.toDouble()/total, losses = losses,
-                            timesTraitor = rs.getInt(5), gamesPlayed = total) //add losses?
+                            timesTraitor = rs.getInt(5), gamesPlayed = total)
             con.close()
         } catch (e: Exception) {
             throw APIException("${e.message}")
