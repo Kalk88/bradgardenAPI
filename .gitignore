@@ -51,7 +51,7 @@ fabric.properties
 
 #Maven
 .idea/
-.iml
+*.iml
 target/
 pom.xml.tag
 pom.xml.releaseBackup
