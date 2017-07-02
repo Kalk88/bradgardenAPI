@@ -68,9 +68,10 @@ fun main(args: Array<String>) {
         try {
             val id = req.params(":id").toInt()
             val member = mapper.readValue<addMember>(req.body())
-            res.type(JSON)
             if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
                res.status(204)
+            } else {
+                res.status(400)
             }
         } catch (e: Exception) {
           throw APIException("Error: ${e.message}")
@@ -101,7 +102,18 @@ fun main(args: Array<String>) {
 
     get(GAMES) {req, res ->
         try {
-
+            val pageStart: Int? = req.queryParams("pageStart")?.toInt()
+            val pageSize: Int? = req.queryParams("pageSize")?.toInt()
+            res.type(JSON)
+            if(pageStart != null && pageSize != null) {
+                mapper.writeValueAsString(GameDAO().get(limit = pageSize, offset = pageStart))
+            } else if (pageStart == null && pageSize != null) {
+                mapper.writeValueAsString(GameDAO().get(limit = pageSize))
+            } else if (pageStart != null && pageSize == null) {
+                mapper.writeValueAsString(GameDAO().get(offset = pageStart))
+            } else {
+                mapper.writeValueAsString(GameDAO().get())
+            }
         }catch (e: Exception) {
          throw APIException("Error: ${e.message}")
         }
@@ -109,7 +121,11 @@ fun main(args: Array<String>) {
 
     put(GAMESID) {req, res ->
         try {
-
+            val id = req.params(":id").toInt()
+            val game = mapper.readValue<AddGame>(req.body())
+            GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
+            res.type(JSON)
+            res.status(204)
         }catch (e: Exception) {
             throw APIException("Error: ${e.message}")
         }
@@ -117,7 +133,9 @@ fun main(args: Array<String>) {
 
     delete(GAMESID) {req, res ->
         try {
-
+            val id = req.params(":id").toInt()
+            res.status(204)
+            MemberDAO().delete(id)
         }catch (e: Exception) {
             throw APIException("Error: ${e.message}")
         }
@@ -158,8 +176,8 @@ fun main(args: Array<String>) {
         try {
             val id = req.params(":id").toInt()
             res.type(JSON)
-            mapper.writeValueAsString(SessionDAO().getDetailed(id))}
-        catch (e: Exception) {
+            mapper.writeValueAsString(SessionDAO().getDetailed(id))
+        } catch (e: Exception) {
             throw APIException("Error: ${e.message}")
         }
     }

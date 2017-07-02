@@ -41,14 +41,13 @@ class GameDAO  {
         return false
     }
 
-    fun get(from:Int = 0, amount: Int = 0): ArrayList<Game>{
+    fun get(limit:Int = 25, offset: Int = 0): ArrayList<Game>{
         val games = ArrayList<Game>()
- //       val game = arrayOf(Game(id=0,name="Abrakadabra",maxNumOfPlayers = 111,traitor = true,coop = false))
         try{
             val con = openConnection()
             val stmt =  con.prepareStatement("select * from game limit ? offset ?")
-            stmt.setInt(1, amount)
-            stmt.setInt(2, from)
+            stmt.setInt(1, limit)
+            stmt.setInt(2, offset)
             stmt.executeQuery()
             con.close()
         }catch (e:Exception){
@@ -73,7 +72,7 @@ class GameDAO  {
 }
 
 data class Game(val id: Int, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean)
-data class AddGame(val name: String, val maxNumOfPlayers: Int,val traitor: Boolean,val coop: Boolean){
+data class AddGame(val name: String, val maxNumOfPlayers: Int,val traitor: Boolean,val coop: Boolean) {
     init {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
         require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
