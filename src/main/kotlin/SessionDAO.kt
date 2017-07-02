@@ -117,6 +117,7 @@ class SessionDAO  {
             return Session(id, gameID = sess.resultSet.getInt(2), date = sess.resultSet.getString(3),
                             winners = w, losers = l, traitors = t)
         } catch (e: Exception) {
+            println(e.message)
             throw APIException("${e.message}")
         }
     }

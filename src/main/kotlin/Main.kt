@@ -145,6 +145,7 @@ fun main(args: Array<String>) {
         try {
             val session = mapper.readValue<addSession>(req.body())
             res.type(JSON)
+            res.status(201)
             val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
                              losers = session.losers, traitors = session.traitors)
         toJSON("id", id)
