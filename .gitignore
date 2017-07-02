@@ -6,6 +6,7 @@
 .idea/**/tasks.xml
 .idea/dictionaries
 
+
 # Sensitive or high-churn files:
 .idea/**/dataSources/
 .idea/**/dataSources.ids
@@ -49,6 +50,8 @@ crashlytics-build.properties
 fabric.properties
 
 #Maven
+.idea/
+.iml
 target/
 pom.xml.tag
 pom.xml.releaseBackup
