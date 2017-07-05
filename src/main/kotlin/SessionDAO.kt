@@ -1,3 +1,4 @@
+import mu.KLogging
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.util.ArrayList
@@ -6,7 +7,7 @@ import java.util.ArrayList
  * Created by kalk on 6/20/17.
  */
 class SessionDAO  {
-
+    companion object: KLogging()
     fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
        val sessionID: Int
         try {
@@ -49,8 +50,8 @@ class SessionDAO  {
             }
             con.close()
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw APIException("${e.message}")
+            logger.error("Error ADD ${e.message}")
+            throw APIException("Could not add session")
         }
         return sessionID
     }
@@ -69,6 +70,7 @@ class SessionDAO  {
             }
             con.close()
         } catch (e: Exception) {
+            logger.error("Error GET ${e.message}")
             throw APIException("${e.message}")
         }
         return sessions
@@ -117,7 +119,7 @@ class SessionDAO  {
             return Session(id, gameID = sess.resultSet.getInt(2), date = sess.resultSet.getString(3),
                             winners = w, losers = l, traitors = t)
         } catch (e: Exception) {
-            println(e.message)
+            logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
         }
     }
@@ -131,7 +133,8 @@ class SessionDAO  {
             con.close()
             return true
         } catch (e: Exception) {
-            throw APIException("${e.message}")
+            logger.error("Error DELETE ${e.message}")
+            throw APIException("Failed to delete $id")
         }
     }
 }

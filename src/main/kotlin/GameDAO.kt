@@ -1,8 +1,11 @@
+import mu.KLogging
+import org.slf4j.LoggerFactory
+
 /**
  * Created by kalk on 6/20/17.
  */
 class GameDAO  {
-
+    companion object: KLogging()
     fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
         var game_id: Int
         try{
@@ -16,8 +19,8 @@ class GameDAO  {
             game_id=stmt.resultSet.getInt(1)
             con.close()
         }catch (e: Exception){
-            println(e.message)
-            throw APIException("could not add game $name")
+            logger.error("Error ADD ${e.message}")
+            throw APIException("Could not add game $name")
         }
 
         return game_id
@@ -35,10 +38,9 @@ class GameDAO  {
             con.close()
             return true
         }catch (e: Exception){
-            println(e.message)
+            logger.error("Error UPDATE ${e.message}")
             throw APIException("could not update game $name")
         }
-        return false
     }
 
     fun get(limit:Int = 25, offset: Int = 0): ArrayList<Game>{
@@ -50,7 +52,8 @@ class GameDAO  {
             stmt.setInt(2, offset)
             stmt.executeQuery()
             con.close()
-        }catch (e:Exception){
+        }catch (e:Exception) {
+            logger.error("Error GET ${e.message}")
             println(e.message)
         }
         return games
@@ -65,9 +68,9 @@ class GameDAO  {
             con.close()
             return true
         }catch (e: Exception){
-            println(e.message)
+            logger.error("Error DELETE ${e.message}")
+            throw APIException("Failed to delete $id")
         }
-        return false
     }
 }
 

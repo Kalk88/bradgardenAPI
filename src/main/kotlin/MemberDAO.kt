@@ -1,12 +1,14 @@
+import mu.KLogging
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 
 /**
  * Created by kalk on 6/20/17.
  */
 class MemberDAO {
-
+    companion object: KLogging()
     fun add(firstName: String, lastName: String): Int {
-         var res: Int
+         var id: Int
         try {
             val con = openConnection()
             val stmt = con.prepareStatement("insert into member (first_name, last_name) values (?,?) returning member_id")
@@ -14,13 +16,14 @@ class MemberDAO {
             stmt.setString(2,lastName)
             stmt.executeQuery()
             stmt.resultSet.next()
-            res = stmt.resultSet.getInt(1)
+            id = stmt.resultSet.getInt(1)
             con.close()
         } catch (e: Exception) {
-            println(e.message)
+            logger.error("Error ADD ${e.message}")
             throw APIException("could not add member $firstName $lastName")
         }
-        return res
+        logger.info("Added $firstName $lastName $id to database")
+        return id
     }
 
     fun update(firstName: String, lastName: String, id: Int): Boolean {
@@ -32,12 +35,12 @@ class MemberDAO {
             stmt.setInt(3, id)
             stmt.execute()
             con.close()
+            logger.info("Updated member $id")
             return true
         } catch (e: Exception) {
-            println(e.message)
+            logger.error("Error UPDATE ${e.message}")
             throw APIException("could not update member $firstName $lastName")
         }
-        return false
     }
 
     fun get(limit: Int = 100, offset: Int = 0): ArrayList<getMember> {
@@ -54,7 +57,7 @@ class MemberDAO {
             }
             con.close()
         } catch (e: Exception) {
-            println(e.message)
+            logger.error("Error GET ${e.message}")
         }
         return members
     }
@@ -82,6 +85,7 @@ class MemberDAO {
                             timesTraitor = rs.getInt(5), gamesPlayed = total)
             con.close()
         } catch (e: Exception) {
+            logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
         }
         return  member
@@ -94,11 +98,12 @@ class MemberDAO {
             stmt.setInt(1, id)
             stmt.execute()
             con.close()
+            logger.info("Removed member $id")
             return true
         } catch (e: Exception) {
-            throw APIException("${e.message}")
+            logger.error("Error DELETE ${e.message}")
+            throw APIException("Failed to delete $id")
         }
-        return false
     }
 }
 
