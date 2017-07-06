@@ -1,23 +1,36 @@
+import java.io.*
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+
 /**
+ * Singelton, gives access to the database.
  * Created by kalk on 6/22/17.
  */
-fun openConnection() : Connection {
-    try {
-      val connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bradgarden?user=postgres&password=postgres")
-        return connection
-    } catch (e: SQLException) {
-        throw APIException("database connection error" + e.message)
+
+class DBConnection private constructor(){
+    private val dburl : String
+    init {
+        dburl = File("src/main/resources/db.txt").readText()
+    }
+    private object Holder { val INSTANCE = DBConnection()}
+
+    companion object {
+        val instance: DBConnection by lazy { Holder.INSTANCE }
+    }
+
+    /**
+     * @Return a connection to the database.
+     */
+    fun open(): Connection {
+        try {
+
+            val connection = DriverManager.getConnection(dburl)
+            return connection
+        } catch (e: SQLException) {
+            throw APIException("database connection error" + e.message)
+        }
     }
 }
 
-fun closeConnection(connection: Connection) {
-    try {
-        connection.close()
-    } catch (e: SQLException) {
-        e.printStackTrace()
-    }
 
-}
