@@ -24,7 +24,6 @@ class DBConnection private constructor(){
      */
     fun open(): Connection {
         try {
-
             val connection = DriverManager.getConnection(dburl)
             return connection
         } catch (e: SQLException) {
