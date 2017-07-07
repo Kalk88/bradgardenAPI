@@ -1,5 +1,5 @@
 import mu.KLogging
-import java.sql.ResultSet
+import org.apache.commons.dbutils.DbUtils
 
 /**
  * Created by kalk on 6/20/17.
@@ -7,65 +7,66 @@ import java.sql.ResultSet
 class MemberDAO {
     companion object: KLogging()
     fun add(firstName: String, lastName: String): Int {
-         var id: Int
+        var id: Int
+        val con = DBConnection.instance.open()
         try {
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("insert into member (first_name, last_name) values (?,?) returning member_id")
             stmt.setString(1,firstName)
             stmt.setString(2,lastName)
             stmt.executeQuery()
             stmt.resultSet.next()
             id = stmt.resultSet.getInt(1)
-            con.close()
         } catch (e: Exception) {
             logger.error("Error ADD ${e.message}")
             throw APIException("could not add member $firstName $lastName")
+        } finally {
+            DbUtils.close(con)
         }
         logger.info("Added $firstName $lastName $id to database")
         return id
     }
 
     fun update(firstName: String, lastName: String, id: Int): Boolean {
+        val con = DBConnection.instance.open()
         try {
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("update Member set first_name = ?, last_name = ? where member_id = ?")
             stmt.setString(1, firstName)
             stmt.setString(2, lastName)
             stmt.setInt(3, id)
             stmt.execute()
-            con.close()
             logger.info("Updated member $id")
             return true
         } catch (e: Exception) {
             logger.error("Error UPDATE ${e.message}")
             throw APIException("could not update member $firstName $lastName")
+        } finally {
+            DbUtils.close(con)
         }
     }
 
     fun get(limit: Int = 100, offset: Int = 0): ArrayList<getMember> {
         val members = ArrayList<getMember>()
+        val con = DBConnection.instance.open()
         try {
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("select * from member limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
-            val rs: ResultSet
-            rs = stmt.executeQuery()
+            val rs = stmt.executeQuery()
             while (rs.next()) {
                 members.add(getMember(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3)))
             }
-            con.close()
         } catch (e: Exception) {
             logger.error("Error GET ${e.message}")
+        } finally {
+            DbUtils.close(con)
         }
         return members
     }
 
-    fun     getDetailed(id: Int): Member {
+    fun getDetailed(id: Int): Member {
+        val con = DBConnection.instance.open()
         val member: Member
-        val rs: ResultSet
         try {
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor from
                                                 (select count(member) as wins from winner where member = ?) as w,
                                                 (select count(member) as losses from loser where member = ?) as l,
@@ -74,44 +75,46 @@ class MemberDAO {
 
             for(i in 1..4)
                 stmt.setInt(i, id)
-            rs = stmt.executeQuery()
+            val rs = stmt.executeQuery()
             rs.next()
             val wins = rs.getInt(3)
             val losses = rs.getInt(4)
             val total = wins + losses
             member = Member(id = id, firstName = rs.getString(1), lastName = rs.getString(2),
-                            wins = wins, winRatio = wins.toDouble()/total, losses = losses,
-                            timesTraitor = rs.getInt(5), gamesPlayed = total)
-            con.close()
+                    wins = wins, winRatio = wins.toDouble()/total, losses = losses,
+                    timesTraitor = rs.getInt(5), gamesPlayed = total)
         } catch (e: Exception) {
             logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
+        } finally {
+            DbUtils.close(con)
         }
-        return  member
+        return member
     }
 
     fun delete(id: Int): Boolean {
+        val con = DBConnection.instance.open()
         try {
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("delete from member where member_id = ?")
             stmt.setInt(1, id)
             stmt.execute()
-            con.close()
             logger.info("Removed member $id")
             return true
         } catch (e: Exception) {
             logger.error("Error DELETE ${e.message}")
             throw APIException("Failed to delete $id")
+        } finally {
+            DbUtils.close(con)
         }
     }
 }
 
 data class addMember(val firstName: String, val lastName: String) {
     init {
-            val numbers = Regex(".*\\d+.*")
-            require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
-            require(firstName.length > 1) {"$firstName is invalid, must be at least 2 characters."}
-            require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
+        val numbers = Regex(".*\\d+.*")
+        require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
+        require(firstName.length > 1) {"$firstName is invalid, must be at least 2 characters."}
+        require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
     }
 }
 
