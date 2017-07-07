@@ -1,5 +1,5 @@
 import mu.KLogging
-
+import org.apache.commons.dbutils.DbUtils
 /**
  * Created by kalk on 6/20/17.
  */
@@ -7,8 +7,8 @@ class GameDAO  {
     companion object: KLogging()
     fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
         var game_id: Int
+        val con = DBConnection.instance.open()
         try{
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("insert into game (name, maxNumOfPlayers, traitor, coop) values (?,?,?,?) returning game_id")
             stmt.setString(1,name)
             stmt.setInt(2,maxNumOfPlayers)
@@ -16,18 +16,18 @@ class GameDAO  {
             stmt.setBoolean(4, coop)
             stmt.executeQuery()
             game_id=stmt.resultSet.getInt(1)
-            con.close()
-        }catch (e: Exception){
+        } catch (e: Exception){
             logger.error("Error ADD ${e.message}")
             throw APIException("Could not add game $name")
+        } finally {
+            DbUtils.close(con)
         }
-
         return game_id
     }
 
     fun update(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Boolean {
+        val con = DBConnection.instance.open()
         try{
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("update game set name = ?, maxNumOfPlayes = ?, traitor = ?, coop = ? where game_id = id")
             stmt.setString(1, name)
             stmt.setInt(2, maxNumOfPlayers)
@@ -39,13 +39,15 @@ class GameDAO  {
         }catch (e: Exception){
             logger.error("Error UPDATE ${e.message}")
             throw APIException("could not update game $name")
+        } finally {
+            DbUtils.close(con)
         }
     }
 
     fun get(limit:Int = 25, offset: Int = 0): ArrayList<Game>{
         val games = ArrayList<Game>()
+        val con = DBConnection.instance.open()
         try{
-            val con = DBConnection.instance.open()
             val stmt =  con.prepareStatement("select * from game limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
@@ -53,22 +55,24 @@ class GameDAO  {
             con.close()
         }catch (e:Exception) {
             logger.error("Error GET ${e.message}")
+        } finally {
+            DbUtils.close(con)
         }
-
         return games
     }
 
     fun delete(id: Int): Boolean{
+        val con = DBConnection.instance.open()
         try{
-            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("delete from game where game_id = ?")
             stmt.setInt(1,id)
             stmt.executeQuery()
-            con.close()
             return true
         }catch (e: Exception){
             logger.error("Error DELETE ${e.message}")
             throw APIException("Failed to delete $id")
+        } finally {
+            DbUtils.close(con)
         }
     }
 }
