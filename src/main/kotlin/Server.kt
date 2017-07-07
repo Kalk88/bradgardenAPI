@@ -25,7 +25,7 @@ class Server {
         val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val auth = Authorization()
+//        val auth = Authorization()
         port(8080)
 
         get(ENDPOINTS) { req, res ->
@@ -210,7 +210,7 @@ class Server {
         })
 
        after("/*") { req, res ->
-           logger.info("${req.ip()}")
+           log(req.ip(), req.requestMethod(), "Jens")
        }
     }
 
