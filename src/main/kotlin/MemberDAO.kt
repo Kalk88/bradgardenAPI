@@ -1,5 +1,4 @@
 import mu.KLogging
-import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 
 /**
@@ -10,7 +9,7 @@ class MemberDAO {
     fun add(firstName: String, lastName: String): Int {
          var id: Int
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("insert into member (first_name, last_name) values (?,?) returning member_id")
             stmt.setString(1,firstName)
             stmt.setString(2,lastName)
@@ -28,7 +27,7 @@ class MemberDAO {
 
     fun update(firstName: String, lastName: String, id: Int): Boolean {
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("update Member set first_name = ?, last_name = ? where member_id = ?")
             stmt.setString(1, firstName)
             stmt.setString(2, lastName)
@@ -46,7 +45,7 @@ class MemberDAO {
     fun get(limit: Int = 100, offset: Int = 0): ArrayList<getMember> {
         val members = ArrayList<getMember>()
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("select * from member limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
@@ -66,7 +65,7 @@ class MemberDAO {
         val member: Member
         val rs: ResultSet
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor from
                                                 (select count(member) as wins from winner where member = ?) as w,
                                                 (select count(member) as losses from loser where member = ?) as l,
@@ -93,7 +92,7 @@ class MemberDAO {
 
     fun delete(id: Int): Boolean {
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("delete from member where member_id = ?")
             stmt.setInt(1, id)
             stmt.execute()

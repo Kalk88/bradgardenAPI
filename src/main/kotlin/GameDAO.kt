@@ -1,5 +1,4 @@
 import mu.KLogging
-import org.slf4j.LoggerFactory
 
 /**
  * Created by kalk on 6/20/17.
@@ -9,7 +8,7 @@ class GameDAO  {
     fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
         var game_id: Int
         try{
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("insert into game (name, maxNumOfPlayers, traitor, coop) values (?,?,?,?) returning game_id")
             stmt.setString(1,name)
             stmt.setInt(2,maxNumOfPlayers)
@@ -28,7 +27,7 @@ class GameDAO  {
 
     fun update(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Boolean {
         try{
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("update game set name = ?, maxNumOfPlayes = ?, traitor = ?, coop = ? where game_id = id")
             stmt.setString(1, name)
             stmt.setInt(2, maxNumOfPlayers)
@@ -46,7 +45,7 @@ class GameDAO  {
     fun get(limit:Int = 25, offset: Int = 0): ArrayList<Game>{
         val games = ArrayList<Game>()
         try{
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt =  con.prepareStatement("select * from game limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
@@ -54,14 +53,14 @@ class GameDAO  {
             con.close()
         }catch (e:Exception) {
             logger.error("Error GET ${e.message}")
-            println(e.message)
         }
+
         return games
     }
 
     fun delete(id: Int): Boolean{
         try{
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("delete from game where game_id = ?")
             stmt.setInt(1,id)
             stmt.executeQuery()

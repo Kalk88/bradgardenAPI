@@ -11,7 +11,7 @@ class SessionDAO  {
     fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
        val sessionID: Int
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val insertSession  = "insert into game_session (game, session_date) values (?, ?) returning session_id"
             val insertWinner = "insert into winner values (?, ?)"
             val insertLoser = "insert into loser  values (?, ?)"
@@ -59,7 +59,7 @@ class SessionDAO  {
     fun get(limit:Int = 100, offset:Int = 0): ArrayList<lightSession> {
         val sessions = ArrayList<lightSession>()
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
@@ -86,7 +86,7 @@ class SessionDAO  {
         var trait : PreparedStatement
         var sess : PreparedStatement
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             sess = con.prepareStatement(getSession)
             sess.setInt(1, id)
             sess.executeQuery()
@@ -126,7 +126,7 @@ class SessionDAO  {
 
     fun delete(id: Int): Boolean {
         try {
-            val con = openConnection()
+            val con = DBConnection.instance.open()
             val stmt = con.prepareStatement("delete from game_session where session_id = ?")
             stmt.setInt(1, id)
             stmt.execute()
