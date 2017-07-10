@@ -3,7 +3,6 @@ import org.apache.commons.dbutils.DbUtils
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.util.ArrayList
-
 /**
  * Created by kalk on 6/20/17.
  */
@@ -17,9 +16,9 @@ class SessionDAO  {
             val insertWinner = "insert into winner values (?, ?)"
             val insertLoser = "insert into loser  values (?, ?)"
             val insertTraitor = "insert into traitor values (?, ?)"
-            var win : PreparedStatement
+            var win: PreparedStatement
             var lose: PreparedStatement
-            var trait : PreparedStatement
+            var traitor: PreparedStatement
             var session = con.prepareStatement(insertSession)
             session.setInt(1, gameID)
             session.setString(2, date)
@@ -42,11 +41,11 @@ class SessionDAO  {
                 lose.execute()
             }
             if(traitors.isNotEmpty()) {
-                for (traitor in traitors) {
-                    trait = con.prepareStatement(insertTraitor)
-                    trait.setInt(1, sessionID)
-                    trait.setInt(2, traitor)
-                    trait.execute()
+                for (t in traitors) {
+                    traitor = con.prepareStatement(insertTraitor)
+                    traitor.setInt(1, sessionID)
+                    traitor.setInt(2, t)
+                    traitor.execute()
                 }
             }
         } catch (e: Exception) {
@@ -84,10 +83,10 @@ class SessionDAO  {
         val getWinners =  "select member from winner where game_session = ?"
         val getLosers =   "select member from loser where game_session = ?"
         val getTraitors = "select member from traitor where game_session = ?"
-        var win : PreparedStatement
+        var win: PreparedStatement
         var lose: PreparedStatement
-        var trait : PreparedStatement
-        var sess : PreparedStatement
+        var traitor: PreparedStatement
+        var sess: PreparedStatement
         val con = DBConnection.instance.open()
         try {
             sess = con.prepareStatement(getSession)
@@ -108,12 +107,12 @@ class SessionDAO  {
             while (lose.resultSet.next()) {
                 l.add(lose.resultSet.getInt(1))
             }
-            trait = con.prepareStatement(getTraitors)
-            trait.setInt(1, id)
-            trait.executeQuery()
+            traitor = con.prepareStatement(getTraitors)
+            traitor.setInt(1, id)
+            traitor.executeQuery()
             val t = ArrayList<Int>()
-            while (trait.resultSet.next()) {
-                t.add(trait.resultSet.getInt(1))
+            while (traitor.resultSet.next()) {
+                t.add(traitor.resultSet.getInt(1))
             }
             return Session(id, gameID = sess.resultSet.getInt(2), date = sess.resultSet.getString(3),
                             winners = w, losers = l, traitors = t)
