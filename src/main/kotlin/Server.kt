@@ -25,8 +25,26 @@ class Server {
         val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-//        val auth = Authorization()
+        val auth = Authorization()
         port(8080)
+
+        before("/*") {req, res ->
+            res.header("Access-Control-Allow-Origin", "*")
+        }
+        before ("/api/*") {req, res ->
+            try {
+                val params = req.headers("Authorization").split(":")
+                val user = params[0]
+                val key = params[1]
+                println(req.headers("Authorization"))
+                log(req.ip(), req.requestMethod(), user)
+                if(!auth.authorize(key, req.body(), user)) {
+                    throw APIException("Unauthorized request")
+                }
+            } catch (e: Exception) {
+                logger.error { e.printStackTrace() }
+                throw APIException("Unauthorized request") }
+        }
 
         get(ENDPOINTS) { req, res ->
             res.type(JSON)
@@ -203,18 +221,24 @@ class Server {
             }
         }
 
+        post("/api/admin/generate") { req, res ->
+            val user = mapper.readValue<apiUser>(req.body())
+            val secret = auth.addUser(user.name, user.email)
+            res.type(JSON)
+            toJSON("secret", secret)
+        }
+
+
        exception(APIException::class.java, { exception, req, res ->
             res.status(400)
             res.type(JSON)
-            res.body(exception.message)
+           val message = exception.localizedMessage
+            toJSON("error_message", message)
         })
 
-       after("/*") { req, res ->
-           log(req.ip(), req.requestMethod(), "Jens")
-       }
     }
 
-    fun toJSON(key: Any, value: Any): String {
+    fun toJSON(key: String, value: Any): String {
         return "{\"${key}\": \"${value}\"}"
     }
 
