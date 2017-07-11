@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
+import spark.Response
 import spark.Spark.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -50,17 +51,16 @@ class Server {
         }
 
         get(ENDPOINTS) { req, res ->
-            res.type(JSON)
-            mapper.writeValueAsString(publicEndpoints)
+            buildResponse(body=mapper.writeValueAsString(publicEndpoints), response = res)
+            res.body()
         }
 
         post(MEMBERS) { req, res ->
             try {
                 val member = mapper.readValue<addMember>(req.body())
-                var id = MemberDAO().add(member.firstName, member.lastName)
-                res.type(JSON)
-                res.status(HTTP_CREATED)
-                toJSON("id", id)
+                val id = MemberDAO().add(member.firstName, member.lastName)
+                buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -88,8 +88,8 @@ class Server {
         get(MEMBER_ID) { req, res ->
             try {
                 val id = paramToInt(req.params(":id"))
-                res.type(JSON)
-                mapper.writeValueAsString(MemberDAO().getDetailed(id))
+                buildResponse(body = mapper.writeValueAsString(MemberDAO().getDetailed(id)), response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -99,11 +99,9 @@ class Server {
             try {
                 val id = paramToInt(req.params(":id"))
                 val member = mapper.readValue<addMember>(req.body())
-                if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
-                    res.status(HTTP_NO_CONTENT)
-                } else {
-                    res.status(HTTP_BAD_REQUEST)
-                }
+                MemberDAO().update(member.firstName, member.lastName, id = id)
+                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -112,8 +110,9 @@ class Server {
         delete(MEMBER_ID) { req, res ->
             try {
                 val id = paramToInt(req.params(":id"))
-                res.status(HTTP_NO_CONTENT)
                 MemberDAO().delete(id)
+                buildResponse(statusCode = HTTP_NO_CONTENT, type="", response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -123,9 +122,8 @@ class Server {
             try {
                 val game = mapper.readValue<AddGame>(req.body())
                 var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
-                res.type(JSON)
-                res.status(HTTP_CREATED)
-                toJSON("id", id)
+                buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -155,8 +153,8 @@ class Server {
                 val id = paramToInt(req.params(":id"))
                 val game = mapper.readValue<AddGame>(req.body())
                 GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
-                res.type(JSON)
-                res.status(HTTP_NO_CONTENT)
+                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -165,8 +163,9 @@ class Server {
         delete(GAME_ID) { req, res ->
             try {
                 val id = paramToInt(req.params(":id"))
-                res.status(HTTP_NO_CONTENT)
-                MemberDAO().delete(id)
+                GameDAO().delete(id)
+                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -175,11 +174,10 @@ class Server {
         post(SESSIONS) { req, res ->
             try {
                 val session = mapper.readValue<addSession>(req.body())
-                res.type(JSON)
-                res.status(HTTP_CREATED)
                 val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
                         losers = session.losers, traitors = session.traitors)
-                toJSON("id", id)
+                buildResponse(statusCode=HTTP_CREATED, body =toJSON("id", id), response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -204,21 +202,22 @@ class Server {
             }
         }
 
-       get(SESSION_ID) { req, res ->
+        get(SESSION_ID) { req, res ->
             try {
                 val id = paramToInt(req.params(":id"))
-                res.type(JSON)
-                mapper.writeValueAsString(SessionDAO().getDetailed(id))
+                buildResponse(body=mapper.writeValueAsString(SessionDAO().getDetailed(id)), response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
         }
 
-       delete(SESSION_ID) { req, res ->
+        delete(SESSION_ID) { req, res ->
             try {
                 val id = paramToInt(req.params(":id"))
-                res.status(HTTP_NO_CONTENT)
                 SessionDAO().delete(id)
+                buildResponse(statusCode=HTTP_NO_CONTENT, type ="", response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -227,21 +226,23 @@ class Server {
         post("/api/admin/generate") { req, res ->
             val user = mapper.readValue<apiUser>(req.body())
             val secret = auth.addUser(user.name, user.email)
-            res.type(JSON)
-            toJSON("secret", secret)
+            buildResponse(statusCode = HTTP_CREATED, body=toJSON("secret", secret),response = res)
+            res.body()
         }
 
-
-       exception(APIException::class.java, { exception, req, res ->
-            res.status(HTTP_BAD_REQUEST)
-            res.type(JSON)
-           val message = exception.message ?: "error with request"
-            toJSON("error_message", message)
+        exception(APIException::class.java, { exception, req, res ->
+            val message = exception.message ?: "error with request"
+            buildResponse(statusCode= HTTP_BAD_REQUEST, body = toJSON("error_message", message), response = res)
+            res.body()
         })
-
     }
 
-
+    private fun buildResponse(statusCode:Int = HTTP_OK, type:String = JSON, body: String = "", response: Response): Response {
+        response.status(statusCode)
+        response.type(type)
+        response.body(body)
+        return response
+    }
     private fun paramToInt(param:String):Int {
         return try {param.toInt()} catch (e:Exception){ throw APIException("invalid id")}
     }
