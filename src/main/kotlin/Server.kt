@@ -139,7 +139,7 @@ class Server {
                 val id = paramToInt(req.params(":id"))
                 val game = mapper.readValue<AddGame>(req.body())
                 GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
-                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+                buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
                 res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -150,7 +150,7 @@ class Server {
             try {
                 val id = paramToInt(req.params(":id"))
                 GameDAO().delete(id)
-                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+                buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
                 res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -162,7 +162,7 @@ class Server {
                 val session = mapper.readValue<addSession>(req.body())
                 val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
                         losers = session.losers, traitors = session.traitors)
-                buildResponse(statusCode=HTTP_CREATED, body =toJSON("id", id), response = res)
+                buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
