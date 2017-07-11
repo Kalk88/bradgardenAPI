@@ -21,6 +21,8 @@ const val HTTP_OK = 200
 const val HTTP_CREATED = 201
 const val HTTP_NO_CONTENT = 204
 const val HTTP_BAD_REQUEST = 400
+const val DEFAULT_LIMIT = 100
+const val DEFAULT_OFFSET = 0
 
 class APIException(message: String) : Exception(message)
 
@@ -68,18 +70,10 @@ class Server {
 
         get(MEMBERS) { req, res ->
             try {
-                val pageStart: Int? = req.queryParams("pageStart")?.toInt()
-                val pageSize: Int? = req.queryParams("pageSize")?.toInt()
-                res.type(JSON)
-                if (pageStart != null && pageSize != null) {
-                    mapper.writeValueAsString(MemberDAO().get(limit = pageSize, offset = pageStart))
-                } else if (pageStart == null && pageSize != null) {
-                    mapper.writeValueAsString(MemberDAO().get(limit = pageSize))
-                } else if (pageStart != null && pageSize == null) {
-                    mapper.writeValueAsString(MemberDAO().get(offset = pageStart))
-                } else {
-                    mapper.writeValueAsString(MemberDAO().get())
-                }
+                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
+                val result = mapper.writeValueAsString(MemberDAO().get(limit = params.first, offset = params.second))
+                buildResponse(body = result, response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -131,18 +125,10 @@ class Server {
 
         get(GAMES) { req, res ->
             try {
-                val pageStart: Int? = req.queryParams("pageStart")?.toInt()
-                val pageSize: Int? = req.queryParams("pageSize")?.toInt()
-                res.type(JSON)
-                if (pageStart != null && pageSize != null) {
-                    mapper.writeValueAsString(GameDAO().get(limit = pageSize, offset = pageStart))
-                } else if (pageStart == null && pageSize != null) {
-                    mapper.writeValueAsString(GameDAO().get(limit = pageSize))
-                } else if (pageStart != null && pageSize == null) {
-                    mapper.writeValueAsString(GameDAO().get(offset = pageStart))
-                } else {
-                    mapper.writeValueAsString(GameDAO().get())
-                }
+                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
+                val result = mapper.writeValueAsString(GameDAO().get(limit = params.first, offset = params.second))
+                buildResponse(body = result, response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -185,18 +171,10 @@ class Server {
 
         get(SESSIONS) { req, res ->
             try {
-                val pageStart: Int? = req.queryParams("pageStart")?.toInt()
-                val pageSize: Int? = req.queryParams("pageSize")?.toInt()
-                res.type(JSON)
-                if (pageStart != null && pageSize != null) {
-                    mapper.writeValueAsString(SessionDAO().get(limit = pageSize, offset = pageStart))
-                } else if (pageStart == null && pageSize != null) {
-                    mapper.writeValueAsString(SessionDAO().get(limit = pageSize))
-                } else if (pageStart != null && pageSize == null) {
-                    mapper.writeValueAsString(SessionDAO().get(offset = pageStart))
-                } else {
-                    mapper.writeValueAsString(SessionDAO().get())
-                }
+                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
+                val result = mapper.writeValueAsString(SessionDAO().get(limit = params.first, offset = params.second))
+                buildResponse(body = result, response = res)
+                res.body()
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
@@ -253,5 +231,9 @@ class Server {
 
     private fun logRequest(ip:String, method: String, user: String) {
         logger.info("""$method request by $user from $ip""")
+    }
+
+    private fun parseParams(p1:String?, p2:String?) : Pair<Int,Int> {
+        return Pair(p1?.toInt() ?: DEFAULT_LIMIT, p2?.toInt() ?:DEFAULT_OFFSET)
     }
 }

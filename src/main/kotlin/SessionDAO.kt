@@ -6,8 +6,9 @@ import java.util.ArrayList
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO  {
+class SessionDAO {
     companion object: KLogging()
+
     fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
        val sessionID: Int
         val con = DBConnection.instance.open()
