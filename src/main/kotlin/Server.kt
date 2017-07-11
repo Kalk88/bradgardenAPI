@@ -240,15 +240,17 @@ class Server {
         })
 
     }
-    fun paramToInt(param:String):Int {
+
+
+    private fun paramToInt(param:String):Int {
         return try {param.toInt()} catch (e:Exception){ throw APIException("invalid id")}
     }
 
-    fun toJSON(key: String, value: Any): String {
+    private fun toJSON(key: String, value: Any): String {
         return "{\"${key}\": \"${value}\"}"
     }
 
-    fun logRequest(ip:String, method: String, user: String) {
+    private fun logRequest(ip:String, method: String, user: String) {
         logger.info("""$method request by $user from $ip""")
     }
 }
