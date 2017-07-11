@@ -87,7 +87,7 @@ class Server {
 
         get(MEMBER_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 res.type(JSON)
                 mapper.writeValueAsString(MemberDAO().getDetailed(id))
             } catch (e: Exception) {
@@ -97,7 +97,7 @@ class Server {
 
         put(MEMBER_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 val member = mapper.readValue<addMember>(req.body())
                 if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
                     res.status(HTTP_NO_CONTENT)
@@ -111,7 +111,7 @@ class Server {
 
         delete(MEMBER_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 res.status(HTTP_NO_CONTENT)
                 MemberDAO().delete(id)
             } catch (e: Exception) {
@@ -152,7 +152,7 @@ class Server {
 
         put(GAME_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 val game = mapper.readValue<AddGame>(req.body())
                 GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
                 res.type(JSON)
@@ -164,7 +164,7 @@ class Server {
 
         delete(GAME_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 res.status(HTTP_NO_CONTENT)
                 MemberDAO().delete(id)
             } catch (e: Exception) {
@@ -206,7 +206,7 @@ class Server {
 
        get(SESSION_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 res.type(JSON)
                 mapper.writeValueAsString(SessionDAO().getDetailed(id))
             } catch (e: Exception) {
@@ -216,7 +216,7 @@ class Server {
 
        delete(SESSION_ID) { req, res ->
             try {
-                val id = req.params(":id").toInt()
+                val id = paramToInt(req.params(":id"))
                 res.status(HTTP_NO_CONTENT)
                 SessionDAO().delete(id)
             } catch (e: Exception) {
@@ -239,6 +239,9 @@ class Server {
             toJSON("error_message", message)
         })
 
+    }
+    fun paramToInt(param:String):Int {
+        return try {param.toInt()} catch (e:Exception){ throw APIException("invalid id")}
     }
 
     fun toJSON(key: String, value: Any): String {
