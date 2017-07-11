@@ -10,12 +10,16 @@ import java.time.format.DateTimeFormatter
  */
 const val ENDPOINTS = "/api/endpoints"
 const val MEMBERS = "/api/members"
-const val MEMBERSID = "/api/members/:id"
+const val MEMBER_ID = "/api/members/:id"
 const val GAMES = "/api/games"
-const val GAMESID = "/api/game/:id"
+const val GAME_ID = "/api/game/:id"
 const val SESSIONS = "/api/sessions"
-const val SESSIONSID ="/api/sessions/:id"
+const val SESSION_ID ="/api/sessions/:id"
 const val JSON ="application/json"
+const val HTTP_OK = 200
+const val HTTP_CREATED = 201
+const val HTTP_NO_CONTENT = 204
+const val HTTP_BAD_REQUEST = 400
 
 class APIException(message: String) : Exception(message)
 
@@ -36,7 +40,6 @@ class Server {
                 val params = req.headers("Authorization").split(":")
                 val user = params[0]
                 val key = params[1]
-                println(req.headers("Authorization"))
                 log(req.ip(), req.requestMethod(), user)
                 if(!auth.authorize(key, req.body(), user)) {
                     throw APIException("Unauthorized request")
@@ -56,7 +59,7 @@ class Server {
                 val member = mapper.readValue<addMember>(req.body())
                 var id = MemberDAO().add(member.firstName, member.lastName)
                 res.type(JSON)
-                res.status(201)
+                res.status(HTTP_CREATED)
                 toJSON("id", id)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -82,7 +85,7 @@ class Server {
             }
         }
 
-        get(MEMBERSID) { req, res ->
+        get(MEMBER_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
                 res.type(JSON)
@@ -92,24 +95,24 @@ class Server {
             }
         }
 
-        put(MEMBERSID) { req, res ->
+        put(MEMBER_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
                 val member = mapper.readValue<addMember>(req.body())
                 if (MemberDAO().update(member.firstName, member.lastName, id = id)) {
-                    res.status(204)
+                    res.status(HTTP_NO_CONTENT)
                 } else {
-                    res.status(400)
+                    res.status(HTTP_BAD_REQUEST)
                 }
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
         }
 
-        delete(MEMBERSID) { req, res ->
+        delete(MEMBER_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
-                res.status(204)
+                res.status(HTTP_NO_CONTENT)
                 MemberDAO().delete(id)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -121,7 +124,7 @@ class Server {
                 val game = mapper.readValue<AddGame>(req.body())
                 var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
                 res.type(JSON)
-                res.status(201)
+                res.status(HTTP_CREATED)
                 toJSON("id", id)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -147,22 +150,22 @@ class Server {
             }
         }
 
-        put(GAMESID) { req, res ->
+        put(GAME_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
                 val game = mapper.readValue<AddGame>(req.body())
                 GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
                 res.type(JSON)
-                res.status(204)
+                res.status(HTTP_NO_CONTENT)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
             }
         }
 
-        delete(GAMESID) { req, res ->
+        delete(GAME_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
-                res.status(204)
+                res.status(HTTP_NO_CONTENT)
                 MemberDAO().delete(id)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -173,7 +176,7 @@ class Server {
             try {
                 val session = mapper.readValue<addSession>(req.body())
                 res.type(JSON)
-                res.status(201)
+                res.status(HTTP_CREATED)
                 val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
                         losers = session.losers, traitors = session.traitors)
                 toJSON("id", id)
@@ -201,7 +204,7 @@ class Server {
             }
         }
 
-       get(SESSIONSID) { req, res ->
+       get(SESSION_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
                 res.type(JSON)
@@ -211,10 +214,10 @@ class Server {
             }
         }
 
-       delete(SESSIONSID) { req, res ->
+       delete(SESSION_ID) { req, res ->
             try {
                 val id = req.params(":id").toInt()
-                res.status(204)
+                res.status(HTTP_NO_CONTENT)
                 SessionDAO().delete(id)
             } catch (e: Exception) {
                 throw APIException("Error: ${e.message}")
@@ -230,9 +233,9 @@ class Server {
 
 
        exception(APIException::class.java, { exception, req, res ->
-            res.status(400)
+            res.status(HTTP_BAD_REQUEST)
             res.type(JSON)
-           val message = exception.localizedMessage
+           val message = exception.message ?: "error with request"
             toJSON("error_message", message)
         })
 
