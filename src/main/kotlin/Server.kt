@@ -40,7 +40,7 @@ class Server {
                 val params = req.headers("Authorization").split(":")
                 val user = params[0]
                 val key = params[1]
-                log(req.ip(), req.requestMethod(), user)
+                logRequest(req.ip(), req.requestMethod(), user)
                 if(!auth.authorize(key, req.body(), user)) {
                     throw APIException("Unauthorized request")
                 }
@@ -248,7 +248,7 @@ class Server {
         return "{\"${key}\": \"${value}\"}"
     }
 
-    fun log(ip:String, method: String, user: String) {
+    fun logRequest(ip:String, method: String, user: String) {
         logger.info("""$method request by $user from $ip""")
     }
 }
