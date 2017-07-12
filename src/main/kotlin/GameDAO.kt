@@ -9,12 +9,13 @@ class GameDAO  {
         var game_id: Int
         val con = DBConnection.instance.open()
         try{
-            val stmt = con.prepareStatement("insert into game (name, maxNumOfPlayers, traitor, coop) values (?,?,?,?) returning game_id")
+            val stmt = con.prepareStatement("insert into game (game_name, max_Players, traitor, co_op) values (?,?,?,?) returning game_id")
             stmt.setString(1,name)
             stmt.setInt(2,maxNumOfPlayers)
             stmt.setBoolean(3, traitor)
             stmt.setBoolean(4, coop)
             stmt.executeQuery()
+            stmt.resultSet.next()
             game_id=stmt.resultSet.getInt(1)
         } catch (e: Exception){
             logger.error("Error ADD ${e.message}")
@@ -28,12 +29,12 @@ class GameDAO  {
     fun update(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Boolean {
         val con = DBConnection.instance.open()
         try{
-            val stmt = con.prepareStatement("update game set name = ?, maxNumOfPlayes = ?, traitor = ?, coop = ? where game_id = id")
+            val stmt = con.prepareStatement("update game set game_name = ?, max_Players = ?, traitor = ?, co_op = ? where game_id = $id")
             stmt.setString(1, name)
             stmt.setInt(2, maxNumOfPlayers)
             stmt.setBoolean(3, traitor)
             stmt.setBoolean(4, coop)
-            stmt.executeQuery()
+            stmt.execute()
             con.close()
             return true
         }catch (e: Exception){
@@ -52,6 +53,10 @@ class GameDAO  {
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
             stmt.executeQuery()
+            val rs = stmt.resultSet
+            while(rs.next()){
+                games.add(Game(id = rs.getInt("game_id"), name = rs.getString("game_name"),maxNumOfPlayers = rs.getInt("max_Players"), traitor = rs.getBoolean("traitor"), coop = rs.getBoolean("co_op")))
+            }
             con.close()
         }catch (e:Exception) {
             logger.error("Error GET ${e.message}")
@@ -66,7 +71,7 @@ class GameDAO  {
         try{
             val stmt = con.prepareStatement("delete from game where game_id = ?")
             stmt.setInt(1,id)
-            stmt.executeQuery()
+            stmt.execute()
             return true
         }catch (e: Exception){
             logger.error("Error DELETE ${e.message}")

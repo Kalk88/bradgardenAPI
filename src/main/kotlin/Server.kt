@@ -13,7 +13,7 @@ const val ENDPOINTS = "/api/endpoints"
 const val MEMBERS = "/api/members"
 const val MEMBER_ID = "/api/members/:id"
 const val GAMES = "/api/games"
-const val GAME_ID = "/api/game/:id"
+const val GAME_ID = "/api/games/:id"
 const val SESSIONS = "/api/sessions"
 const val SESSION_ID ="/api/sessions/:id"
 const val JSON ="application/json"
@@ -32,25 +32,25 @@ class Server {
         val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val auth = Authorization()
+//        val auth = Authorization()
         port(8080)
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
-        before ("/api/*") {req, res ->
-            try {
-                val params = req.headers("Authorization").split(":")
-                val user = params[0]
-                val key = params[1]
-                logRequest(req.ip(), req.requestMethod(), user)
-                if(!auth.authorize(key, req.body(), user)) {
-                    throw APIException("Unauthorized request")
-                }
-            } catch (e: Exception) {
-                logger.error { e.printStackTrace() }
-                throw APIException("Unauthorized request") }
-        }
+//        before ("/api/*") {req, res ->
+//            try {
+//                val params = req.headers("Authorization").split(":")
+//                val user = params[0]
+//                val key = params[1]
+//                logRequest(req.ip(), req.requestMethod(), user)
+//                if(!auth.authorize(key, req.body(), user)) {
+//                    throw APIException("Unauthorized request")
+//                }
+//            } catch (e: Exception) {
+//                logger.error { e.printStackTrace() }
+//                throw APIException("Unauthorized request") }
+//        }
 
         get(ENDPOINTS) { req, res ->
             buildResponse(body=mapper.writeValueAsString(publicEndpoints), response = res)
@@ -113,14 +113,14 @@ class Server {
         }
 
         post(GAMES) { req, res ->
-            try {
-                val game = mapper.readValue<AddGame>(req.body())
-                var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
-                buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+                try {
+                    val game = mapper.readValue<AddGame>(req.body())
+                    var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
+                    buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                    res.body()
+                } catch (e: Exception) {
+                    throw APIException("Error: ${e.message}")
+                }
         }
 
         get(GAMES) { req, res ->
@@ -203,8 +203,8 @@ class Server {
 
         post("/api/admin/generate") { req, res ->
             val user = mapper.readValue<apiUser>(req.body())
-            val secret = auth.addUser(user.name, user.email)
-            buildResponse(statusCode = HTTP_CREATED, body=toJSON("secret", secret),response = res)
+//            val secret = auth.addUser(user.name, user.email)
+//            buildResponse(statusCode = HTTP_CREATED, body=toJSON("secret", secret),response = res)
             res.body()
         }
 
