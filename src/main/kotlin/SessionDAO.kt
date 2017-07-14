@@ -1,8 +1,9 @@
 import mu.KLogging
 import org.apache.commons.dbutils.DbUtils
+import java.sql.Connection
 import java.sql.PreparedStatement
-import java.sql.ResultSet
 import java.util.ArrayList
+
 /**
  * Created by kalk on 6/20/17.
  */
@@ -10,44 +11,23 @@ class SessionDAO {
     companion object: KLogging()
 
     fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
-       val sessionID: Int
+        val sessionID: Int
         val con = DBConnection.instance.open()
         try {
             val insertSession  = "insert into game_session (game, session_date) values (?, ?) returning session_id"
-            val insertWinner = "insert into winner values (?, ?)"
-            val insertLoser = "insert into loser  values (?, ?)"
-            val insertTraitor = "insert into traitor values (?, ?)"
-            var win: PreparedStatement
-            var lose: PreparedStatement
-            var traitor: PreparedStatement
+            val winnerStatement = "insert into winner values (?, ?)"
+            val loserStatement = "insert into loser  values (?, ?)"
+            val traitorStatement = "insert into traitor values (?, ?)"
             var session = con.prepareStatement(insertSession)
             session.setInt(1, gameID)
             session.setString(2, date)
             session.executeQuery()
             session.resultSet.next()
             sessionID = session.resultSet.getInt(1)
-            print(sessionID)
-
-            for (winner in winners) {
-                win = con.prepareStatement(insertWinner)
-                win.setInt(1, sessionID)
-                win.setInt(2, winner)
-                win.execute()
-            }
-
-            for (loser in losers) {
-               lose = con.prepareStatement(insertLoser)
-                lose.setInt(1, sessionID)
-                lose.setInt(2, loser)
-                lose.execute()
-            }
-            if(traitors.isNotEmpty()) {
-                for (t in traitors) {
-                    traitor = con.prepareStatement(insertTraitor)
-                    traitor.setInt(1, sessionID)
-                    traitor.setInt(2, t)
-                    traitor.execute()
-                }
+            insertRecord(winnerStatement, con, winners, sessionID)
+            insertRecord(loserStatement, con, losers, sessionID)
+            if(!traitors.isEmpty()) {
+                insertRecord(traitorStatement, con, traitors, sessionID)
             }
         } catch (e: Exception) {
             logger.error("Error ADD ${e.message}")
@@ -65,8 +45,7 @@ class SessionDAO {
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
-            val rs: ResultSet
-            rs = stmt.executeQuery()
+            val rs = stmt.executeQuery()
             while (rs.next()) {
                 sessions.add(lightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
             }
@@ -84,39 +63,20 @@ class SessionDAO {
         val getWinners =  "select member from winner where game_session = ?"
         val getLosers =   "select member from loser where game_session = ?"
         val getTraitors = "select member from traitor where game_session = ?"
-        var win: PreparedStatement
-        var lose: PreparedStatement
-        var traitor: PreparedStatement
-        var sess: PreparedStatement
+        var session: PreparedStatement
         val con = DBConnection.instance.open()
         try {
-            sess = con.prepareStatement(getSession)
-            sess.setInt(1, id)
-            sess.executeQuery()
-            sess.resultSet.next()
-            win = con.prepareStatement(getWinners)
-            win.setInt(1, id)
-            win.executeQuery()
-            val w = ArrayList<Int>()
-            while (win.resultSet.next()) {
-                w.add(win.resultSet.getInt(1))
-            }
-            lose = con.prepareStatement(getLosers)
-            lose.setInt(1, id)
-            lose.executeQuery()
-            val l = ArrayList<Int>()
-            while (lose.resultSet.next()) {
-                l.add(lose.resultSet.getInt(1))
-            }
-            traitor = con.prepareStatement(getTraitors)
-            traitor.setInt(1, id)
-            traitor.executeQuery()
-            val t = ArrayList<Int>()
-            while (traitor.resultSet.next()) {
-                t.add(traitor.resultSet.getInt(1))
-            }
-            return Session(id, gameID = sess.resultSet.getInt(2), date = sess.resultSet.getString(3),
-                            winners = w, losers = l, traitors = t)
+            session = con.prepareStatement(getSession)
+            session.setInt(1, id)
+            session.executeQuery()
+            session.resultSet.next()
+
+            val w = retrieveRecord(getWinners, con, id)
+            val l = retrieveRecord(getLosers, con, id)
+            val t = retrieveRecord(getTraitors, con, id)
+
+            return Session(id, gameID = session.resultSet.getInt(2), date = session.resultSet.getString(3),
+                    winners = w, losers = l, traitors = t)
         } catch (e: Exception) {
             logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
@@ -139,6 +99,27 @@ class SessionDAO {
         } finally {
             DbUtils.close(con)
         }
+    }
+
+    private fun insertRecord(statement:String, con: Connection, members: List<Int>, sessionID: Int) {
+        var stmt : PreparedStatement
+        for (member in members) {
+            stmt = con.prepareStatement(statement)
+            stmt.setInt(1, sessionID)
+            stmt.setInt(2, member)
+            stmt.execute()
+        }
+    }
+
+    private fun retrieveRecord(statement: String, con: Connection, id: Int): ArrayList<Int> {
+        val stmt = con.prepareStatement(statement)
+        stmt.setInt(1, id)
+        stmt.executeQuery()
+        val list = ArrayList<Int>()
+        while (stmt.resultSet.next()) {
+            list.add(stmt.resultSet.getInt(1))
+        }
+        return list
     }
 }
 data class lightSession(val id: Int, val date: String, val gameID: Int)
