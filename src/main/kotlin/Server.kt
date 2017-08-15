@@ -60,7 +60,7 @@ class Server {
         post(MEMBERS) { req, res ->
             try {
                 val member = mapper.readValue<addMember>(req.body())
-                val id = MemberDAO().add(member.firstName, member.lastName)
+                val id = MemberDAO().add(member)
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: Exception) {
@@ -93,7 +93,7 @@ class Server {
             try {
                 val id = paramToInt(req.params(":id"))
                 val member = mapper.readValue<addMember>(req.body())
-                MemberDAO().update(member.firstName, member.lastName, id = id)
+                MemberDAO().update(id, member)
                 buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
                 res.body()
             } catch (e: Exception) {

@@ -11,7 +11,9 @@ import java.sql.SQLException
 class DBConnection private constructor(){
     private val dburl : String
     init {
-        dburl = File("src/main/resources/db.txt").readText()
+        dburl = "jdbc:postgresql://db:5432/bradgarden?user=postgres&password=postgres"
+
+        //File("src/main/resources/db.txt").readText()
     }
     private object Holder { val INSTANCE = DBConnection()}
 
@@ -31,5 +33,3 @@ class DBConnection private constructor(){
         }
     }
 }
-
-
