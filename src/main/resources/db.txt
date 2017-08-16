@@ -1,1 +1,1 @@
-jdbc:postgresql://localhost:5432/bradgarden?user=postgres&password=postgres
+jdbc:postgresql://db:5432/bradgarden?user=postgres&password=postgres

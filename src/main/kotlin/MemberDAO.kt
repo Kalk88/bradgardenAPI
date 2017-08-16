@@ -104,8 +104,6 @@ class MemberDAO: MemberDAOInterface {
         return member
     }
 
-
-
 }
 
 data class addMember(val firstName: String, val lastName: String) {
