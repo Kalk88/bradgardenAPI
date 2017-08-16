@@ -5,6 +5,5 @@ import java.util.ArrayList
  *
  */
 interface DAOReadInterface {
-    fun get(limit: Int = 100, offset:Int = 0): ArrayList<Any>
-    fun getDetailed(id: Int): Any
+
 }
