@@ -1,3 +1,5 @@
+import java.util.*
+
 interface GameDAOInterface {
     fun add(game: AddGame): Int
     fun update(id: Int, game: AddGame): Boolean

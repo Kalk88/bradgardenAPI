@@ -1,4 +1,3 @@
-import java.io.*
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -8,12 +7,11 @@ import java.sql.SQLException
  * Created by kalk on 6/22/17.
  */
 
-class DBConnection private constructor(){
+class DBConnection private constructor() {
     private val dburl : String
     init {
-        dburl = "jdbc:postgresql://db:5432/bradgarden?user=postgres&password=postgres"
-
-        //File("src/main/resources/db.txt").readText()
+        dburl = "jdbc:postgresql://localhost:5432/bradgarden?user=postgres&password=postgres"
+//        dburl = File("src/main/resources/db.txt").readText()
     }
     private object Holder { val INSTANCE = DBConnection()}
 

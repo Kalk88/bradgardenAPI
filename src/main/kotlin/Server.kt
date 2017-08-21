@@ -115,7 +115,7 @@ class Server {
         post(GAMES) { req, res ->
                 try {
                     val game = mapper.readValue<AddGame>(req.body())
-                    var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
+                    var id = GameDAO().add(game)
                     buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                     res.body()
                 } catch (e: Exception) {
@@ -138,7 +138,7 @@ class Server {
             try {
                 val id = paramToInt(req.params(":id"))
                 val game = mapper.readValue<AddGame>(req.body())
-                GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
+                GameDAO().update(id, game)
                 buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
                 res.body()
             } catch (e: Exception) {
