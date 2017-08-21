@@ -2,35 +2,57 @@ import org.junit.Assert.*
 import org.junit.*
 
 class DAOBehavior {
-    @Test fun creates_MemberDAO() {
-        val dao = MemberDAO()
-        Assert.assertEquals(dao::class, MemberDAO::class)
+    @Test fun creates_a_MemberDAO() {
     }
 
     @Test fun should_add_member_to_database() {
-        val dao = MemberDAO()
-        val member = addMember("jens", "test") //stub or mock?
-        Assert.assertEquals(dao.add(member), Int::class)
     }
 
-    @Test fun updateInMemberDAO() {
-        val dao = MemberDAO()
-        val member = addMember("jens", "test")
-        Assert.assertTrue(dao.update(1, member))
+    @Test fun update_member_in_DAO() {
     }
 
-    @Test fun getFromMemberDAO() {
-        val dao = MemberDAO()
-        Assert.assertEquals(dao.get(), ArrayList<Any>())
+    @Test fun get_members_from_DAO() {
     }
 
-    @Test fun getDetailedFromMemberDAO() {
-        val dao = MemberDAO()
-        Assert.assertEquals(dao.getDetailed(1), Any::class)
+    @Test fun get_detailed_member_from_DAO() {
     }
 
-    @Test fun deleteFromMemberDAO() {
-        val dao = MemberDAO()
-        Assert.assertTrue(dao.delete(1))
+    @Test fun delete_member_from_DAO() {
+    }
+
+    @Test fun creates_a_GameDAO() {
+    }
+
+    @Test fun should_add_game_to_database() {
+    }
+
+    @Test fun update_game_in_DAO() {
+    }
+
+    @Test fun get_games_from_DAO() {
+    }
+
+    @Test fun get_detailed_game_from_DAO() {
+    }
+
+    @Test fun delete_game_from_DAO() {
+    }
+
+    @Test fun creates_a_SessionDAO() {
+    }
+
+    @Test fun should_add_session_to_database() {
+    }
+
+    @Test fun update_session_in_DAO() {
+    }
+
+    @Test fun get_sessions_from_DAO() {
+    }
+
+    @Test fun get_detailed_session_From_DAO() {
+    }
+
+    @Test fun delete_session_from_DAO() {
     }
 }
