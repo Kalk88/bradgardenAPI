@@ -44,17 +44,28 @@ class MemberDAO {
         }
     }
 
-    fun get(limit: Int = 100, offset: Int = 0): ArrayList<getMember> {
-        val members = ArrayList<getMember>()
+    fun get(limit: Int = 100, offset: Int = 0): ArrayList<Member> {
+        val members = ArrayList<Member>()
         val con = DBConnection.instance.open()
         try {
-            val stmt = con.prepareStatement("select * from member limit ? offset ?")
+            val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor, m.id from
+                                                (select count(member) as wins from winner) as w,
+                                                (select count(member) as losses from loser) as l,
+                                                (select count(member) as timesTraitor from traitor) as t,
+                                                (select first_name as first, last_name as last , member_id as id from member) as m  limit ? offset ?""")
             stmt.setInt(1, limit)
-            stmt.setInt(2, offset)
+            stmt.setInt(2,offset)
             val rs = stmt.executeQuery()
-            while (rs.next()) {
-                members.add(getMember(id = rs.getInt(1), firstName = rs.getString(2), lastName = rs.getString(3)))
+            while(rs.next()) {
+                val wins = rs.getInt(3)
+                val losses = rs.getInt(4)
+                val total = wins + losses
+                members.add(Member(id = rs.getInt(6), firstName = rs.getString(1), lastName = rs.getString(2),
+                        wins = wins, winRatio = wins.toDouble() / total, losses = losses,
+                        timesTraitor = rs.getInt(5), gamesPlayed = total))
             }
+
+
         } catch (e: Exception) {
             logger.error("Error GET ${e.message}")
         } finally {
@@ -91,6 +102,8 @@ class MemberDAO {
         }
         return member
     }
+
+
 
     fun delete(id: Int): Boolean {
         val con = DBConnection.instance.open()
