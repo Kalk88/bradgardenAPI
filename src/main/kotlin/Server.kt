@@ -65,14 +65,6 @@ class Server {
 
         get(MEMBERS) { req, res ->
             //TODO make work with memberController
-            try {
-                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-                val result = mapper.writeValueAsString(MemberDAO().get(limit = params.first, offset = params.second))
-                buildResponse(body = result, response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
         }
 
         get(MEMBER_ID) { req, res ->
@@ -101,10 +93,6 @@ class Server {
 
         get(GAMES) { req, res ->
             //TODO make work with gameController
-            val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-            val result = mapper.writeValueAsString(GameDAO().get(limit = params.first, offset = params.second))
-            buildResponse(body = result, response = res)
-            res.body()
         }
 
         put(GAME_ID) { req, res ->
@@ -127,10 +115,6 @@ class Server {
 
         get(SESSIONS) { req, res ->
             //TODO make work with sessionsController
-            val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-            val result = mapper.writeValueAsString(SessionDAO().get(limit = params.first, offset = params.second))
-            buildResponse(body = result, response = res)
-            res.body()
         }
 
         get(SESSION_ID) { req, res ->
