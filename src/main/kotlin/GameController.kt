@@ -54,8 +54,4 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
             throw APIException("Could not remove game")
         }
     }
-
-    private fun parseParam(param: String?, default: Int): Int{
-        return param?.toInt() ?: default
-    }
 }

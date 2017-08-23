@@ -53,12 +53,9 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
     override fun removeWithID(id: String) {
         try {
             dao.delete(id.toInt())
+            logger.info { "Removed member $id" }
         } catch (e: Exception) {
             throw APIException("Could delete member")
         }
     }
-
-  private fun parseParam(param: String?, default: Int): Int{
-      return param?.toInt() ?: default
-  }
 }

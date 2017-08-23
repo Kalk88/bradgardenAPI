@@ -4,4 +4,8 @@ interface ControllerInterface {
     fun getFromParams(params: HashMap<String, String>): String
     fun getFromID(id: String): String
     fun removeWithID(id: String)
+
+    fun parseParam(param: String?, default: Int): Int{
+        return param?.toInt() ?: default
+    }
 }

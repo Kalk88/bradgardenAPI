@@ -1,7 +1,6 @@
 interface SessionDAOInterface {
-    fun add(session: addSession): Int
-    fun update(id: Int, session: addSession): Boolean
+    fun add(session: AddSession): Int
     fun delete(id: Int): Boolean
-    fun get(limit: Int = 100, offset:Int = 0): ArrayList<Session>
+    fun get(limit: Int = 100, offset:Int = 0): ArrayList<LightSession>
     fun getDetailed(id: Int): Session
 }

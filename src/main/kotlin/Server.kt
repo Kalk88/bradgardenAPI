@@ -4,8 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+
 /**
  * Created by kalk on 7/5/17.
  */
@@ -29,7 +28,7 @@ class APIException(message: String) : Exception(message)
 class Server {
     companion object: KLogging()
     fun start() {
-        val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val auth = Authorization()
@@ -59,7 +58,7 @@ class Server {
 
         post(MEMBERS) { req, res ->
             try {
-                val member = mapper.readValue<addMember>(req.body())
+                val member = mapper.readValue<AddMember>(req.body())
                 val id = MemberDAO().add(member)
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
@@ -152,9 +151,7 @@ class Server {
 
         post(SESSIONS) { req, res ->
             try {
-                val session = mapper.readValue<addSession>(req.body())
-                val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
-                        losers = session.losers, traitors = session.traitors)
+                val id = SessionController(SessionDAO()).add(req.body())
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: Exception) {
