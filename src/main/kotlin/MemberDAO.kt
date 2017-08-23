@@ -48,6 +48,7 @@ class MemberDAO: MemberDAOInterface {
             stmt.setInt(1, id)
             stmt.execute()
             return true
+
         } catch (e: Exception) {
             throw APIException("Failed to delete $id")
         } finally {
