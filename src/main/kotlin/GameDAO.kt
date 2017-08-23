@@ -1,51 +1,54 @@
 import mu.KLogging
 import org.apache.commons.dbutils.DbUtils
+import java.util.*
+
 /**
  * Created by kalk on 6/20/17.
  */
-class GameDAO  {
+class GameDAO: GameDAOInterface  {
     companion object: KLogging()
-    fun add(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean): Int {
-        var game_id: Int
+
+    override fun add(game: AddGame): Int {
+        var gameId: Int
         val con = DBConnection.instance.open()
         try{
             val stmt = con.prepareStatement("insert into game (game_name, max_Players, traitor, co_op) values (?,?,?,?) returning game_id")
-            stmt.setString(1,name)
-            stmt.setInt(2,maxNumOfPlayers)
-            stmt.setBoolean(3, traitor)
-            stmt.setBoolean(4, coop)
+            stmt.setString(1,game.name)
+            stmt.setInt(2,game.maxNumOfPlayers)
+            stmt.setBoolean(3, game.traitor)
+            stmt.setBoolean(4, game.coop)
             stmt.executeQuery()
             stmt.resultSet.next()
-            game_id=stmt.resultSet.getInt(1)
+            gameId=stmt.resultSet.getInt(1)
         } catch (e: Exception){
             logger.error("Error ADD ${e.message}")
-            throw APIException("Could not add game $name")
+            throw APIException("Could not add game $game.name")
         } finally {
             DbUtils.close(con)
         }
-        return game_id
+        return gameId
     }
 
-    fun update(name: String, maxNumOfPlayers: Int, traitor: Boolean, coop: Boolean, id: Int): Boolean {
+    override fun update(id: Int, game: AddGame): Boolean {
         val con = DBConnection.instance.open()
         try{
             val stmt = con.prepareStatement("update game set game_name = ?, max_Players = ?, traitor = ?, co_op = ? where game_id = $id")
-            stmt.setString(1, name)
-            stmt.setInt(2, maxNumOfPlayers)
-            stmt.setBoolean(3, traitor)
-            stmt.setBoolean(4, coop)
+            stmt.setString(1, game.name)
+            stmt.setInt(2, game.maxNumOfPlayers)
+            stmt.setBoolean(3, game.traitor)
+            stmt.setBoolean(4, game.coop)
             stmt.execute()
             con.close()
             return true
         }catch (e: Exception){
             logger.error("Error UPDATE ${e.message}")
-            throw APIException("could not update game $name")
+            throw APIException("could not update game $game.name")
         } finally {
             DbUtils.close(con)
         }
     }
 
-    fun get(limit:Int = 25, offset: Int = 0): ArrayList<Game>{
+    override fun get(limit: Int, offset:Int): ArrayList<Game> {
         val games = ArrayList<Game>()
         val con = DBConnection.instance.open()
         try{
@@ -66,7 +69,12 @@ class GameDAO  {
         return games
     }
 
-    fun delete(id: Int): Boolean{
+    override fun getDetailed(id: Int): Game {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return Game(-1, "dummy",0,false,false)
+    }
+
+   override fun delete(id: Int): Boolean{
         val con = DBConnection.instance.open()
         try{
             val stmt = con.prepareStatement("delete from game where game_id = ?")

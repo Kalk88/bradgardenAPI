@@ -4,8 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+
 /**
  * Created by kalk on 7/5/17.
  */
@@ -29,7 +28,7 @@ class APIException(message: String) : Exception(message)
 class Server {
     companion object: KLogging()
     fun start() {
-        val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val auth = Authorization()
@@ -59,8 +58,8 @@ class Server {
 
         post(MEMBERS) { req, res ->
             try {
-                val member = mapper.readValue<addMember>(req.body())
-                val id = MemberDAO().add(member.firstName, member.lastName)
+                val member = mapper.readValue<AddMember>(req.body())
+                val id = MemberDAO().add(member)
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: Exception) {
@@ -90,15 +89,8 @@ class Server {
         }
 
         put(MEMBER_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                val member = mapper.readValue<addMember>(req.body())
-                MemberDAO().update(member.firstName, member.lastName, id = id)
-                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+            res.body()
         }
 
         delete(MEMBER_ID) { req, res ->
@@ -115,7 +107,7 @@ class Server {
         post(GAMES) { req, res ->
                 try {
                     val game = mapper.readValue<AddGame>(req.body())
-                    var id = GameDAO().add(game.name, game.maxNumOfPlayers, game.traitor, game.coop)
+                    var id = GameDAO().add(game)
                     buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                     res.body()
                 } catch (e: Exception) {
@@ -138,7 +130,7 @@ class Server {
             try {
                 val id = paramToInt(req.params(":id"))
                 val game = mapper.readValue<AddGame>(req.body())
-                GameDAO().update(game.name, game.maxNumOfPlayers, game.traitor, game.coop, id)
+                GameDAO().update(id, game)
                 buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
                 res.body()
             } catch (e: Exception) {
@@ -159,9 +151,7 @@ class Server {
 
         post(SESSIONS) { req, res ->
             try {
-                val session = mapper.readValue<addSession>(req.body())
-                val id = SessionDAO().add(gameID = session.gameID, date = dtf.format(LocalDateTime.now()), winners = session.winners,
-                        losers = session.losers, traitors = session.traitors)
+                val id = SessionController(SessionDAO()).add(req.body())
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: Exception) {

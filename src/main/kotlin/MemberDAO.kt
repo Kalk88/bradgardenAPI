@@ -1,80 +1,90 @@
-import mu.KLogging
+import kotlin.collections.ArrayList
 import org.apache.commons.dbutils.DbUtils
+
 
 /**
  * Created by kalk on 6/20/17.
  */
-class MemberDAO {
-    companion object: KLogging()
-    fun add(firstName: String, lastName: String): Int {
+class MemberDAO: MemberDAOInterface {
+
+    override fun add(member: AddMember): Int {
         var id: Int
         val con = DBConnection.instance.open()
         try {
             val stmt = con.prepareStatement("insert into member (first_name, last_name) values (?,?) returning member_id")
-            stmt.setString(1,firstName)
-            stmt.setString(2,lastName)
+            stmt.setString(1, member.firstName)
+            stmt.setString(2,member.lastName)
             stmt.executeQuery()
             stmt.resultSet.next()
             id = stmt.resultSet.getInt(1)
         } catch (e: Exception) {
-            logger.error("Error ADD ${e.message}")
-            throw APIException("could not add member $firstName $lastName")
+            throw APIException("could not add member $member.firstName $member.lastName")
         } finally {
             DbUtils.close(con)
         }
-        logger.info("Added $firstName $lastName $id to database")
         return id
     }
 
-    fun update(firstName: String, lastName: String, id: Int): Boolean {
+    override fun update(id: Int, member: AddMember): Boolean {
         val con = DBConnection.instance.open()
         try {
             val stmt = con.prepareStatement("update Member set first_name = ?, last_name = ? where member_id = ?")
-            stmt.setString(1, firstName)
-            stmt.setString(2, lastName)
+            stmt.setString(1, member.firstName)
+            stmt.setString(2, member.lastName)
             stmt.setInt(3, id)
             stmt.execute()
-            logger.info("Updated member $id")
             return true
         } catch (e: Exception) {
-            logger.error("Error UPDATE ${e.message}")
-            throw APIException("could not update member $firstName $lastName")
+            throw APIException("could not update member $member.firstName $member.lastName")
         } finally {
             DbUtils.close(con)
         }
     }
 
-    fun get(limit: Int = 100, offset: Int = 0): ArrayList<Member> {
-        val members = ArrayList<Member>()
+    override fun delete(id: Int): Boolean {
         val con = DBConnection.instance.open()
         try {
-            val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor, m.id from
+            val stmt = con.prepareStatement("delete from member where member_id = ?")
+            stmt.setInt(1, id)
+            stmt.execute()
+            return true
+
+        } catch (e: Exception) {
+            throw APIException("Failed to delete $id")
+        } finally {
+            DbUtils.close(con)
+        }
+    }
+
+    override fun get(limit: Int, offset: Int): ArrayList<Member> {
+        val members = ArrayList<Member>()
+                val con = DBConnection.instance.open()
+                try {
+                    val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor, m.id from
                                                 (select count(member) as wins from winner) as w,
                                                 (select count(member) as losses from loser) as l,
                                                 (select count(member) as timesTraitor from traitor) as t,
                                                 (select first_name as first, last_name as last , member_id as id from member) as m  limit ? offset ?""")
-            stmt.setInt(1, limit)
-            stmt.setInt(2,offset)
-            val rs = stmt.executeQuery()
-            while(rs.next()) {
-                val wins = rs.getInt(3)
-                val losses = rs.getInt(4)
-                val total = wins + losses
-                members.add(Member(id = rs.getInt(6), firstName = rs.getString(1), lastName = rs.getString(2),
-                        wins = wins, winRatio = wins.toDouble() / total, losses = losses,
-                        timesTraitor = rs.getInt(5), gamesPlayed = total))
-            }
-
-
-        } catch (e: Exception) {
-            logger.error("Error GET ${e.message}")
-        } finally {
-            DbUtils.close(con)
-        }
+                    stmt.setInt(1, limit)
+                    stmt.setInt(2,offset)
+                    val rs = stmt.executeQuery()
+                    while(rs.next()) {
+                        val wins = rs.getInt(3)
+                        val losses = rs.getInt(4)
+                        val total = wins + losses
+                        members.add(Member(id = rs.getInt(6), firstName = rs.getString(1), lastName = rs.getString(2),
+                                wins = wins, winRatio = wins.toDouble() / total, losses = losses,
+                                timesTraitor = rs.getInt(5), gamesPlayed = total))
+                    }
+                    } catch (e: Exception) {
+                        throw APIException("${e.message}")
+                    } finally {
+                        DbUtils.close(con)
+                    }
         return members
     }
 
-    fun getDetailed(id: Int): Member {
+    override fun getDetailed(id: Int): Member {
         val con = DBConnection.instance.open()
         val member: Member
         try {
@@ -92,37 +102,18 @@ class MemberDAO {
             val losses = rs.getInt(4)
             val total = wins + losses
             member = Member(id = id, firstName = rs.getString(1), lastName = rs.getString(2),
-                    wins = wins, winRatio = wins.toDouble()/total, losses = losses,
+                    wins = wins, winRatio = wins.toDouble() / total, losses = losses,
                     timesTraitor = rs.getInt(5), gamesPlayed = total)
         } catch (e: Exception) {
-            logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
         } finally {
             DbUtils.close(con)
         }
         return member
     }
-
-
-
-    fun delete(id: Int): Boolean {
-        val con = DBConnection.instance.open()
-        try {
-            val stmt = con.prepareStatement("delete from member where member_id = ?")
-            stmt.setInt(1, id)
-            stmt.execute()
-            logger.info("Removed member $id")
-            return true
-        } catch (e: Exception) {
-            logger.error("Error DELETE ${e.message}")
-            throw APIException("Failed to delete $id")
-        } finally {
-            DbUtils.close(con)
-        }
-    }
 }
 
-data class addMember(val firstName: String, val lastName: String) {
+data class AddMember(val firstName: String, val lastName: String) {
     init {
         val numbers = Regex(".*\\d+.*")
         require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
@@ -130,8 +121,6 @@ data class addMember(val firstName: String, val lastName: String) {
         require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
     }
 }
-
-data class getMember(val id: Int, val firstName: String, val lastName: String)
 
 data class Member(val id: Int, val firstName: String, val lastName: String,
                   val wins: Int, val winRatio: Double, val losses: Int,

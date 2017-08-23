@@ -1,16 +1,17 @@
-import mu.KLogging
 import org.apache.commons.dbutils.DbUtils
 import java.sql.Connection
 import java.sql.PreparedStatement
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.ArrayList
 
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO {
-    companion object: KLogging()
+class SessionDAO: SessionDAOInterface {
+    private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
-    fun add(gameID: Int, date: String, winners: List<Int>, losers: List<Int>, traitors: List<Int>): Int {
+    override fun add(session: AddSession): Int {
         val sessionID: Int
         val con = DBConnection.instance.open()
         try {
@@ -18,19 +19,18 @@ class SessionDAO {
             val winnerStatement = "insert into winner values (?, ?)"
             val loserStatement = "insert into loser  values (?, ?)"
             val traitorStatement = "insert into traitor values (?, ?)"
-            var session = con.prepareStatement(insertSession)
-            session.setInt(1, gameID)
-            session.setString(2, date)
-            session.executeQuery()
-            session.resultSet.next()
-            sessionID = session.resultSet.getInt(1)
-            insertRecord(winnerStatement, con, winners, sessionID)
-            insertRecord(loserStatement, con, losers, sessionID)
-            if(!traitors.isEmpty()) {
-                insertRecord(traitorStatement, con, traitors, sessionID)
+            var insert = con.prepareStatement(insertSession)
+            insert.setInt(1, session.gameID)
+            insert.setString(2, dtf.format(LocalDateTime.now()))
+            insert.executeQuery()
+            insert.resultSet.next()
+            sessionID = insert.resultSet.getInt(1)
+            insertRecord(winnerStatement, con, session.winners, sessionID)
+            insertRecord(loserStatement, con, session.losers, sessionID)
+            if(!session.traitors.isEmpty()) {
+                insertRecord(traitorStatement, con, session.traitors, sessionID)
             }
         } catch (e: Exception) {
-            logger.error("Error ADD ${e.message}")
             throw APIException("Could not add session")
         } finally {
             DbUtils.close(con)
@@ -38,8 +38,8 @@ class SessionDAO {
         return sessionID
     }
 
-    fun get(limit:Int = 100, offset:Int = 0): ArrayList<lightSession> {
-        val sessions = ArrayList<lightSession>()
+    override fun get(limit:Int, offset:Int): ArrayList<LightSession> {
+        val sessions = ArrayList<LightSession>()
         val con = DBConnection.instance.open()
         try {
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
@@ -47,10 +47,9 @@ class SessionDAO {
             stmt.setInt(2, offset)
             val rs = stmt.executeQuery()
             while (rs.next()) {
-                sessions.add(lightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+                sessions.add(LightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
             }
         } catch (e: Exception) {
-            logger.error("Error GET ${e.message}")
             throw APIException("${e.message}")
         } finally {
             DbUtils.close(con)
@@ -58,7 +57,7 @@ class SessionDAO {
         return sessions
     }
 
-    fun getDetailed(id: Int): Session {
+    override fun getDetailed(id: Int): Session {
         val getSession =  "select * from game_session where session_id=?"
         val getWinners =  "select member from winner where game_session = ?"
         val getLosers =   "select member from loser where game_session = ?"
@@ -78,14 +77,13 @@ class SessionDAO {
             return Session(id, gameID = session.resultSet.getInt(2), date = session.resultSet.getString(3),
                     winners = w, losers = l, traitors = t)
         } catch (e: Exception) {
-            logger.error("Error GET DETAILED ${e.message}")
             throw APIException("${e.message}")
         } finally {
             DbUtils.close(con)
         }
     }
 
-    fun delete(id: Int): Boolean {
+    override fun delete(id: Int): Boolean {
         val con = DBConnection.instance.open()
         try {
             val stmt = con.prepareStatement("delete from game_session where session_id = ?")
@@ -94,7 +92,6 @@ class SessionDAO {
             con.close()
             return true
         } catch (e: Exception) {
-            logger.error("Error DELETE ${e.message}")
             throw APIException("Failed to delete $id")
         } finally {
             DbUtils.close(con)
@@ -122,6 +119,6 @@ class SessionDAO {
         return list
     }
 }
-data class lightSession(val id: Int, val date: String, val gameID: Int)
-data class addSession(val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
+data class LightSession(val id: Int, val date: String, val gameID: Int)
+data class AddSession(val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
 data class Session(val id: Int, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)

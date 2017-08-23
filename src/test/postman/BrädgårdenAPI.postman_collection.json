@@ -1,0 +1,896 @@
+{
+	"variables": [],
+	"info": {
+		"name": "BrädgårdenAPI",
+		"_postman_id": "5241e8b1-161b-b7be-c2eb-ad38c8e154e3",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "games",
+			"description": "",
+			"item": [
+				{
+					"name": "Get Games",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"window.Utils = {",
+									"    setHMAC: function(data) {",
+									"        return \"bradgardenstats:\" + CryptoJS.HmacSHA1(data, \"8c0564f4-84d5-4159-a7f2-d91ae3ef9367\");",
+									"    }",
+									"};",
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Should return a list of games"
+					},
+					"response": []
+				},
+				{
+					"name": "Post Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Successful POST request\"] = responseCode.code === 201;",
+									"var jsonData = JSON.parse(responseBody);    ",
+									"var game_id = jsonData.id;",
+									"postman.setEnvironmentVariable(\"gameID\", game_id);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(request.data));   ",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n  \"name\": \"retarded Fun\",\n  \"maxNumOfPlayers\": \"6\",\n  \"traitor\": \"false\",\n  \"coop\": \"true\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Put Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(request.data));   ",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}/{{gameID}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									""
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}/{{gameID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}/{{gameID}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Fail Get Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 400\"] = responseCode.code === 400;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{games}}/{{gameID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "members",
+			"description": "",
+			"item": [
+				{
+					"name": "Get Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");",
+									"",
+									""
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"window.Utils = {",
+									"    setHMAC: function(data) {",
+									"        return \"bradgardenstats:\" + CryptoJS.HmacSHA1(data, \"8c0564f4-84d5-4159-a7f2-d91ae3ef9367\");",
+									"    }",
+									"};",
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": {
+							"raw": "{{url}}{{members}}",
+							"host": [
+								"{{url}}{{members}}"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "2",
+									"equals": true,
+									"description": "",
+									"disabled": true
+								},
+								{
+									"key": "pageStart",
+									"value": "3",
+									"equals": true,
+									"description": "",
+									"disabled": true
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Post Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Successful POST request\"] = responseCode.code === 201;",
+									"var jsonData = JSON.parse(responseBody);    ",
+									"var member_id = jsonData.id;",
+									"postman.setEnvironmentVariable(\"memberID\", member_id);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(request.data));   ",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{members}}",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"firstName\": \"Anthony\",\n\t\"lastName\": \"Dankfano\"\n}\t"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Put Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(request.data));   ",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{members}}/{{memberID}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"firstName\": \"Anthony\",\n\t\"lastName\": \"Updatefano\"\n}\t"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{members}}/{{memberID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{members}}/{{memberID}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Fail Get Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 400\"] = responseCode.code === 400;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{members}}/{{memberID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "sessions",
+			"description": "",
+			"item": [
+				{
+					"name": "Get Sessions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"window.Utils = {",
+									"    setHMAC: function(data) {",
+									"        return \"bradgardenstats:\" + CryptoJS.HmacSHA1(data, \"8c0564f4-84d5-4159-a7f2-d91ae3ef9367\");",
+									"    }",
+									"};",
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": {
+							"raw": "{{url}}{{sessions}}",
+							"host": [
+								"{{url}}{{sessions}}"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "2",
+									"equals": true,
+									"description": "",
+									"disabled": true
+								},
+								{
+									"key": "pageStart",
+									"value": "4",
+									"equals": true,
+									"description": "",
+									"disabled": true
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Post Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Successful POST request\"] = responseCode.code === 201;",
+									"var jsonData = JSON.parse(responseBody);    ",
+									"var session_id = jsonData.id;",
+									"postman.setEnvironmentVariable(\"sessionID\", session_id);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(request.data));   ",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{sessions}}",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"gameID\":\"1\",\n\t\"winners\": [\"1\"],\n\t\"losers\": [\"2\",\"3\",\"4\"],\n\t\"traitors\": [\"1\"]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{sessions}}/{{sessionID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{sessions}}/{{sessionID}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Fail Get Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 400\"] = responseCode.code === 400;"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   "
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}{{sessions}}/{{sessionID}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{hmac}}",
+								"description": ""
+							},
+							{
+								"key": "contentType",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "endpoints",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"window.Utils = {",
+							"    setHMAC: function(data) {",
+							"        return \"bradgardenstats:\" + CryptoJS.HmacSHA1(data, \"8c0564f4-84d5-4159-a7f2-d91ae3ef9367\");",
+							"    }",
+							"};",
+							"postman.setEnvironmentVariable(\"hmac\", Utils.setHMAC(\"\"));   ",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://0.0.0.0:8080/api/endpoints",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{hmac}}",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "generateuiid",
+			"request": {
+				"url": "0.0.0.0:8080/api/admin/generate",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\":\"bradgardenstats\",\n\t\"email\":\"simondmansson@gmail.com\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
