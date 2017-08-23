@@ -1,4 +1,3 @@
-import mu.KLogging
 import kotlin.collections.ArrayList
 import org.apache.commons.dbutils.DbUtils
 
@@ -7,7 +6,6 @@ import org.apache.commons.dbutils.DbUtils
  * Created by kalk on 6/20/17.
  */
 class MemberDAO: MemberDAOInterface {
-    companion object: KLogging()
 
     override fun add(member: addMember): Int {
         var id: Int
@@ -35,7 +33,6 @@ class MemberDAO: MemberDAOInterface {
             stmt.setString(2, member.lastName)
             stmt.setInt(3, id)
             stmt.execute()
-            MemberDAO.logger.info("Updated member $id")
             return true
         } catch (e: Exception) {
             throw APIException("could not update member $member.firstName $member.lastName")
@@ -50,7 +47,6 @@ class MemberDAO: MemberDAOInterface {
             val stmt = con.prepareStatement("delete from member where member_id = ?")
             stmt.setInt(1, id)
             stmt.execute()
-            MemberDAO.logger.info("Removed member $id")
             return true
         } catch (e: Exception) {
             throw APIException("Failed to delete $id")
@@ -114,7 +110,6 @@ class MemberDAO: MemberDAOInterface {
         }
         return member
     }
-
 }
 
 data class addMember(val firstName: String, val lastName: String) {

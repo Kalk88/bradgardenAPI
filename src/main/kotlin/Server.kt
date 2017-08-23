@@ -90,15 +90,8 @@ class Server {
         }
 
         put(MEMBER_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                val member = mapper.readValue<addMember>(req.body())
-                MemberDAO().update(id, member)
-                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+            res.body()
         }
 
         delete(MEMBER_ID) { req, res ->
