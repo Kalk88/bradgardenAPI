@@ -12,7 +12,7 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
 
     override fun add(data: String): String {
         try {
-            val member = mapper.readValue<addMember>(data)
+            val member = mapper.readValue<AddMember>(data)
             val id = dao.add(member)
             logger.info { "added member ${member.firstName} ${member.lastName}" }
             return id.toString()
@@ -23,7 +23,7 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
 
     override fun update(id: String, data: String): String {
         try {
-            val member = mapper.readValue<addMember>(data)
+            val member = mapper.readValue<AddMember>(data)
             dao.update(id.toInt(), member)
             return id
         } catch (e: Exception) {
