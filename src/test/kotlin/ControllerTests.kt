@@ -6,6 +6,7 @@ class ControllerTests {
 
     private fun dummy (id:Int): Member { return Member(id, "dummy", "test", 100, 1.0, 0, 0, 100) }
     private fun dummyGame (id:Int): Game { return Game(id, "dummy", 100, true, true) }
+    private fun dummySession(id: Int): Session {return Session(id, "date", 1, listOf(1,2,3), listOf(3,2,1), listOf(1))}
 
     @Test fun creates_a_memberController() {
         val mock = mock<MemberDAOInterface>()
@@ -20,7 +21,6 @@ class ControllerTests {
         val controller = MemberController(mock)
         assertEquals(controller.add(data),"1")
     }
-
 
     @Test (expected = APIException::class)
     fun should_not_add_member_when_name_is_too_short() {
@@ -202,6 +202,77 @@ class ControllerTests {
     fun should_not_remove_game_when_invalid_ID_cannot_be_converted_to_INT() {
         val mock = mock<GameDAOInterface>()
         val controller = GameController(mock)
+        controller.removeWithID("wrong")
+    }
+
+    @Test fun creates_a_SessionController() {
+        val mock = mock<SessionDAOInterface>()
+        val controller = SessionController(mock)
+    }
+
+    @Test fun should_add_a_session() {
+        val mock = mock<SessionDAOInterface> {
+            on {add(AddSession(1, listOf<Int>(1),listOf<Int>(2,3,4),listOf<Int>(1)))} doReturn 1
+        }
+        val data ="""{ "gameID":"1","winners": ["1"], "losers": ["2","3","4"], "traitors": ["1"] }"""
+        val controller = SessionController(mock)
+        assertEquals(controller.add(data),"1")
+    }
+
+    @Test (expected = APIException::class)
+    fun should_not_add_session_when_field_is_missing() {
+        val mock = mock<SessionDAOInterface>()
+        val controller = SessionController(mock)
+        val data =  """{ "maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
+        controller.add(data)
+    }
+
+    @Test (expected = APIException::class)
+    fun should_never_be_able_to_update_a_session() {
+        val mock = mock<SessionDAOInterface>()
+        val controller = SessionController(mock)
+        controller.update("nope", "never")
+    }
+
+    @Test fun should_return_a_list_of_sessions() {
+        val mocklist = arrayListOf(dummySession(1), dummySession(2))
+        val mock = mock<SessionDAOInterface> {
+//            on {get()} doReturn mocklist
+        }
+        val controller = SessionController(mock)
+        val params = hashMapOf<String, String>()
+        val SessionAsString = controller.getFromParams(params)
+        //TODO something that checks the return
+    }
+
+    @Test fun should_return_session_from_ID() {
+        val mock = mock<SessionDAOInterface> {
+            on {getDetailed(2)} doReturn dummySession(2)
+        }
+        val controller = SessionController(mock)
+        val gameAsString = controller.getFromID("2")
+        assertEquals("""{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}""", gameAsString)
+    }
+
+    @Test  (expected = APIException::class)
+    fun should_not_return_session_when_invalid_ID_cannot_be_converted_to_INT() {
+        val mock = mock<SessionDAOInterface>()
+        val controller = SessionController(mock)
+        controller.getFromID("wrong")
+    }
+
+    @Test fun should_remove_session_with_ID() {
+        val mock = mock<SessionDAOInterface> {
+            on { delete(2)} doReturn true
+        }
+        val controller = SessionController(mock)
+        controller.removeWithID("2")
+    }
+
+    @Test  (expected = APIException::class)
+    fun should_not_remove_session_when_invalid_ID_cannot_be_converted_to_INT() {
+        val mock = mock<SessionDAOInterface>()
+        val controller = SessionController(mock)
         controller.removeWithID("wrong")
     }
 }
