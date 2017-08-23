@@ -7,7 +7,7 @@ import org.apache.commons.dbutils.DbUtils
  */
 class MemberDAO: MemberDAOInterface {
 
-    override fun add(member: addMember): Int {
+    override fun add(member: AddMember): Int {
         var id: Int
         val con = DBConnection.instance.open()
         try {
@@ -25,7 +25,7 @@ class MemberDAO: MemberDAOInterface {
         return id
     }
 
-    override fun update(id: Int, member: addMember): Boolean {
+    override fun update(id: Int, member: AddMember): Boolean {
         val con = DBConnection.instance.open()
         try {
             val stmt = con.prepareStatement("update Member set first_name = ?, last_name = ? where member_id = ?")
@@ -112,7 +112,7 @@ class MemberDAO: MemberDAOInterface {
     }
 }
 
-data class addMember(val firstName: String, val lastName: String) {
+data class AddMember(val firstName: String, val lastName: String) {
     init {
         val numbers = Regex(".*\\d+.*")
         require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
