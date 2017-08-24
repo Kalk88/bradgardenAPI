@@ -97,7 +97,10 @@ class Server {
         }
 
         get(GAMES) { req, res ->
-            //TODO make work with gameController
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val games = gameController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = games, response = res)
+            res.body()
         }
 
         put(GAME_ID) { req, res ->
@@ -119,7 +122,10 @@ class Server {
         }
 
         get(SESSIONS) { req, res ->
-            //TODO make work with sessionsController
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val sessions = sessionController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = sessions, response = res)
+            res.body()
         }
 
         get(SESSION_ID) { req, res ->
