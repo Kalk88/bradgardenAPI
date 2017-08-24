@@ -1,8 +1,10 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import mu.KLogging
 
 class GameController(dao: GameDAOInterface): ControllerInterface {
+    companion object: KLogging()
     private val dao: GameDAOInterface = dao
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
@@ -12,8 +14,10 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
         try {
             val game = mapper.readValue<AddGame>(data)
             val id = dao.add(game)
+            logger.info {"Added game ${game.name}"}
             return id.toString()
         } catch (e:Exception) {
+            logger.error { e.message }
             throw APIException("Could not add game")
         }
     }
@@ -22,8 +26,10 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
         try {
             val game = mapper.readValue<AddGame>(data)
             dao.update(id.toInt(), game)
+            logger.info {"Update game ${game.name}"}
             return id //TODO what to return?
         } catch (e:Exception) {
+            logger.error { e.message }
             throw APIException("Could not update game")
         }
     }
@@ -36,6 +42,7 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
             val offset = paramOrDefault(start, DEFAULT_OFFSET)
             return mapper.writeValueAsString(dao.get(limit, offset-1))
         } catch (e:Exception) {
+            logger.error { e.message }
             throw APIException("Could not get games")
         }
     }
@@ -45,6 +52,7 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
             val game = dao.getDetailed(id.toInt())
             return  mapper.writeValueAsString(game)
         } catch (e:Exception) {
+            logger.error { e.message }
             throw APIException("Could not get game")
         }
     }
@@ -52,7 +60,9 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
     override fun removeWithID(id: String) {
         try {
             dao.delete(id.toInt())
+            logger.info { "Removed game with id $id" }
         } catch (e:Exception) {
+            logger.error { e.message }
             throw APIException("Could not remove game")
         }
     }
