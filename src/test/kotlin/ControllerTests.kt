@@ -270,14 +270,14 @@ class ControllerTests {
     
 
     @Test fun should_return_a_list_of_sessions_when_queryparam_are_zero() {
-        val mocklist = arrayListOf(dummySession(1), dummySession(2))
+        val mocklist = arrayListOf(dummyLightSession(1), dummyLightSession(2))
         val mock = mock<SessionDAOInterface> {
-//            on {get()} doReturn mocklist
+            on {get()} doReturn mocklist
         }
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
-        val SessionAsString = controller.getFromParams(params)
-//        assertEquals()
+        val sessionsAsString = controller.getFromParams(params)
+        assertEquals("""[{"id":1,"date":"date","gameID":1},{"id":2,"date":"date","gameID":1}]""", sessionsAsString)
     }
 
     @Test fun should_return_session_from_ID() {
