@@ -7,6 +7,7 @@ class ControllerTests {
     private fun dummy (id:Int): Member { return Member(id, "dummy", "test", 100, 1.0, 0, 0, 100) }
     private fun dummyGame (id:Int): Game { return Game(id, "dummy", 100, true, true) }
     private fun dummySession(id: Int): Session {return Session(id, "date", 1, listOf(1,2,3), listOf(3,2,1), listOf(1))}
+    private fun dummyLightSession(id: Int): LightSession {return LightSession(id, "date", 1)}
 
     @Test fun creates_a_memberController() {
         val mock = mock<MemberDAOInterface>()
@@ -235,15 +236,16 @@ class ControllerTests {
     }
 
     @Test fun should_return_a_list_of_sessions() {
-        val mocklist = arrayListOf(dummySession(1), dummySession(2))
+        val mocklist = arrayListOf(dummyLightSession(1), dummyLightSession(2))
         val mock = mock<SessionDAOInterface> {
-//            on {get()} doReturn mocklist
+            on {get()} doReturn mocklist
         }
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>()
-        val SessionAsString = controller.getFromParams(params)
-        //TODO something that checks the return
+        val sessionsAsString = controller.getFromParams(params)
+        assertEquals("""[{"id":1,"date":"date","gameID":1},{"id":2,"date":"date","gameID":1}]""", sessionsAsString)
     }
+    
 
     @Test fun should_return_session_from_ID() {
         val mock = mock<SessionDAOInterface> {
