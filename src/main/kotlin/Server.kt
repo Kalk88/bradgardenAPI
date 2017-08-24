@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.sun.xml.internal.fastinfoset.util.StringArray
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
@@ -20,8 +21,6 @@ const val HTTP_OK = 200
 const val HTTP_CREATED = 201
 const val HTTP_NO_CONTENT = 204
 const val HTTP_BAD_REQUEST = 400
-const val DEFAULT_LIMIT = 100
-const val DEFAULT_OFFSET = 0
 
 class APIException(message: String) : Exception(message)
 
@@ -32,6 +31,9 @@ class Server {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val auth = Authorization()
+        val memberController = MemberController(MemberDAO())
+        val gameController = GameController(GameDAO())
+        val sessionController = SessionController(SessionDAO())
         port(8080)
 
         before("/*") {req, res ->
@@ -57,138 +59,85 @@ class Server {
         }
 
         post(MEMBERS) { req, res ->
-            try {
-                val member = mapper.readValue<AddMember>(req.body())
-                val id = MemberDAO().add(member)
-                buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val id = memberController.add(req.body())
+            buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+            res.body()
         }
 
+
         get(MEMBERS) { req, res ->
-            try {
-                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-                val result = mapper.writeValueAsString(MemberDAO().get(limit = params.first, offset = params.second))
-                buildResponse(body = result, response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val members = memberController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = members, response = res)
+            res.body()
         }
 
         get(MEMBER_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                buildResponse(body = mapper.writeValueAsString(MemberDAO().getDetailed(id)), response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val member = memberController.getFromID(req.params(":id"))
+            buildResponse(body = member, response = res)
+            res.body()
         }
 
         put(MEMBER_ID) { req, res ->
+            memberController.update(req.params(":id"), req.body())
             buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
             res.body()
         }
 
         delete(MEMBER_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                MemberDAO().delete(id)
-                buildResponse(statusCode = HTTP_NO_CONTENT, type="", response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            memberController.removeWithID(req.params(":id"))
+            buildResponse(statusCode = HTTP_NO_CONTENT, type="", response = res)
+            res.body()
         }
 
         post(GAMES) { req, res ->
-                try {
-                    val game = mapper.readValue<AddGame>(req.body())
-                    var id = GameDAO().add(game)
-                    buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
-                    res.body()
-                } catch (e: Exception) {
-                    throw APIException("Error: ${e.message}")
-                }
+            val id = gameController.add(req.body())
+            buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+            res.body()
         }
 
         get(GAMES) { req, res ->
-            try {
-                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-                val result = mapper.writeValueAsString(GameDAO().get(limit = params.first, offset = params.second))
-                buildResponse(body = result, response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val games = gameController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = games, response = res)
+            res.body()
         }
 
         put(GAME_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                val game = mapper.readValue<AddGame>(req.body())
-                GameDAO().update(id, game)
-                buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            gameController.update(req.params(":id"), req.body())
+            buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
+            res.body()
         }
 
         delete(GAME_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                GameDAO().delete(id)
-                buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            gameController.removeWithID(req.params(":id"))
+            buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
+            res.body()
         }
 
         post(SESSIONS) { req, res ->
-            try {
-                val id = SessionController(SessionDAO()).add(req.body())
-                buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val id = sessionController.add(req.body())
+            buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+            res.body()
         }
 
         get(SESSIONS) { req, res ->
-            try {
-                val params = parseParams(req.queryParams("pageSize"),req.queryParams("pageStart"))
-                val result = mapper.writeValueAsString(SessionDAO().get(limit = params.first, offset = params.second))
-                buildResponse(body = result, response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val sessions = sessionController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = sessions, response = res)
+            res.body()
         }
 
         get(SESSION_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                buildResponse(body=mapper.writeValueAsString(SessionDAO().getDetailed(id)), response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            val session = sessionController.getFromID(req.params(":id"))
+            buildResponse(body=session, response = res)
+            res.body()
         }
 
         delete(SESSION_ID) { req, res ->
-            try {
-                val id = paramToInt(req.params(":id"))
-                SessionDAO().delete(id)
-                buildResponse(statusCode=HTTP_NO_CONTENT, type ="", response = res)
-                res.body()
-            } catch (e: Exception) {
-                throw APIException("Error: ${e.message}")
-            }
+            sessionController.removeWithID(":id")
+            buildResponse(statusCode=HTTP_NO_CONTENT, type ="", response = res)
+            res.body()
         }
 
         post("/api/admin/generate") { req, res ->
@@ -211,19 +160,18 @@ class Server {
         response.body(body)
         return response
     }
-    private fun paramToInt(param:String):Int {
-        return try {param.toInt()} catch (e:Exception){ throw APIException("invalid id")}
-    }
 
     private fun toJSON(key: String, value: Any): String {
         return "{\"${key}\": \"${value}\"}"
     }
 
-    private fun logRequest(ip:String, method: String, user: String) {
-        logger.info("""$method request by $user from $ip""")
+    private fun exctractQueryParams(queryParams: Map<String, Array<String>>): HashMap<String, String> {
+        var params = HashMap<String, String>()
+        queryParams.forEach { key, value ->  params[key] = value[0]}
+        return params
     }
 
-    private fun parseParams(p1:String?, p2:String?) : Pair<Int,Int> {
-        return Pair(p1?.toInt() ?: DEFAULT_LIMIT, p2?.toInt() ?:DEFAULT_OFFSET)
+    private fun logRequest(ip:String, method: String, user: String) {
+        logger.info("""$method request by $user from $ip""")
     }
 }

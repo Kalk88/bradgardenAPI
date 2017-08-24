@@ -72,7 +72,18 @@ class ControllerTests {
         val controller = MemberController(mock)
         val params = hashMapOf<String, String>()
         val membersAsString = controller.getFromParams(params)
-        //TODO something that checks the return
+        assertEquals("""[{"id":1,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
+    }
+
+    @Test fun should_return_a_list_of_members_when_queryparam_are_zero() {
+        val mocklist = arrayListOf(dummy(1), dummy(2))
+        val mock = mock<MemberDAOInterface> {
+            on {get(100,0)} doReturn mocklist
+        }
+        val controller = MemberController(mock)
+        val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
+        val membersAsString = controller.getFromParams(params)
+        assertEquals("""[{"id":1,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
     }
 
     @Test fun should_return_member_from_ID() {
@@ -170,8 +181,19 @@ class ControllerTests {
         }
         val controller = GameController(mock)
         val params = hashMapOf<String, String>()
-        val gameAsString = controller.getFromParams(params)
-        //TODO something that checks the return
+        val gamesAsString = controller.getFromParams(params)
+        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""", gamesAsString)
+    }
+
+    @Test fun should_return_a_list_of_games_when_queryparam_are_zero() {
+        val mocklist = arrayListOf(dummyGame(1), dummyGame(2))
+        val mock = mock<GameDAOInterface> {
+            on {get(100,0)} doReturn mocklist
+        }
+        val controller = GameController(mock)
+        val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
+        val gamesAsString = controller.getFromParams(params)
+        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""", gamesAsString)
     }
 
     @Test fun should_return_game_from_ID() {
@@ -243,6 +265,17 @@ class ControllerTests {
         val params = hashMapOf<String, String>()
         val SessionAsString = controller.getFromParams(params)
         //TODO something that checks the return
+    }
+
+    @Test fun should_return_a_list_of_sessions_when_queryparam_are_zero() {
+        val mocklist = arrayListOf(dummySession(1), dummySession(2))
+        val mock = mock<SessionDAOInterface> {
+//            on {get()} doReturn mocklist
+        }
+        val controller = SessionController(mock)
+        val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
+        val SessionAsString = controller.getFromParams(params)
+//        assertEquals()
     }
 
     @Test fun should_return_session_from_ID() {

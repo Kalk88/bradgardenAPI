@@ -5,7 +5,9 @@ interface ControllerInterface {
     fun getFromID(id: String): String
     fun removeWithID(id: String)
 
-    fun parseParam(param: String?, default: Int): Int{
-        return param?.toInt() ?: default
+    fun paramOrDefault(param: Int, default: Int): Int {
+        if (param <= 0)
+            return default
+        return param
     }
 }
