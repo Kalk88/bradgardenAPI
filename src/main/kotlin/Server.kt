@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.sun.xml.internal.fastinfoset.util.StringArray
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
@@ -63,8 +64,12 @@ class Server {
             res.body()
         }
 
+
         get(MEMBERS) { req, res ->
-            //TODO make work with memberController
+            val params = exctractQueryParams(req.queryMap().toMap())
+            val members = memberController.getFromParams(params)
+            buildResponse(statusCode = HTTP_OK, body = members, response = res)
+            res.body()
         }
 
         get(MEMBER_ID) { req, res ->
@@ -152,6 +157,12 @@ class Server {
 
     private fun toJSON(key: String, value: Any): String {
         return "{\"${key}\": \"${value}\"}"
+    }
+
+    private fun exctractQueryParams(queryParams: Map<String, Array<String>>): HashMap<String, String> {
+        var params = HashMap<String, String>()
+        queryParams.forEach { key, value ->  params[key] = value[0]}
+        return params
     }
 
     private fun logRequest(ip:String, method: String, user: String) {
