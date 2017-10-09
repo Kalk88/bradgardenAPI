@@ -2,8 +2,9 @@ FORMAT: 1A
 HOST: http://TBD.something
 
 # BrädgårdenAPI
-BrädgårdenStats is the key to finding who the best bord game player in Brädgården really is. 
+BrädgårdenStats is the key to finding who the best bord game player in Brädgården really is.
 The API contains members & games in Brädgården and stats from bord game sessions.
+
 
 # Group Endpoints
 ### Get Endpoints [GET /api/endpoints]
@@ -12,11 +13,10 @@ Retrives a list of callable endpoints.
 + Response 200 (application/json)
 
     + Attributes(array[Endpoint])
-    
+
 # Group Members
 ## Collection Members [/api/members]
-A member is represented with their first and last name. By accessing a specific member url 
-more indepth information such as games played and winrate is acquired.
+A member is represented with their first and last name. Wins losses and more can be retrived from the members route.
 
 ### Add Member [POST]
 This operation adds a member to the collection. It take the first and last name of the member as a JSON object.
@@ -34,26 +34,26 @@ This operation adds a member to the collection. It take the first and last name 
         + id: 1 (number) - Id of member.
 
 ### Get Members [GET /api/members{?pageSize,pageStart}]
-This operation retrives an array of members. Each member object contains a first name, last name and an id.
-+ Parameters 
+This operation retrives an array of members.
++ Parameters
     + pageSize: 10 (number, optional)
     + pageStart: 5 (number, optional)
         + Default: 0
-+  Request 
++  Request
     + Headers
 
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes (array[MemberWithId])
+    + Attributes (array[MemberWithStats])
 
 ### Single Member [/api/members/{id}]
 + Parameters
     + id: 1 (number) - Id of member.
 
 ### Get a Member [GET]
-This operation retrive a single member with more information than get members. 
-+  Request 
+This operation retrive a single member with more information than get members.
++  Request
     + Headers
 
                  Authorization: 1234Example
@@ -62,7 +62,7 @@ This operation retrive a single member with more information than get members.
     + Attributes (array[MemberWithStats])
 
 ### Update Member [PUT]
-This operation updates a member in the collection. 
+This operation updates a member in the collection.
 +  Request (application/json)
     + Headers
 
@@ -76,7 +76,7 @@ This operation updates a member in the collection.
 
 ### Remove Member [DELETE]
 This operation removes a member permanently from the collection. Use with caution as all stats will be lost.
-+  Request 
++  Request
     + Headers
 
                  Authorization: 1234Example
@@ -103,7 +103,7 @@ This operation adds a game to the collection.
 
 ### Get Games [GET /api/games{?pageSize,pageStart}]
 This operation retrives a list of board games. may be filtered with query parameters.
-+ Parameters 
++ Parameters
     + pageSize: 10 (number, optional)
     + pageStart: 5 (number, optional)
         + Default: 0
@@ -137,11 +137,12 @@ This operation updates a game in the collection.
 
                  Authorization: 1234Example
 
-+ Response 204 
++ Response 204
 
 # Group Sessions
 ## Collection Sessions [/api/sessions]
 Sessions contains data about who won against who in what game at some point in time.
+****UNDER CONSTRUCTION****
 ### Add Session [POST]
 This operation adds a game session to the collection.
 +  Request (application/json)
@@ -158,13 +159,13 @@ This operation adds a game session to the collection.
         + id: 1 (number) - Id of session.
 
 ### Get Session [GET /api/sessions{?pageSize,pageStart}]
-This operation returns a list of sessions from the collection. 
+This operation returns a list of sessions from the collection.
 May be filtered with query parameters.
-+ Parameters 
++ Parameters
     + pageSize: 10 (number, optional)
     + pageStart: 5 (number, optional)
         + Default: 0
-+  Request 
++  Request
     + Headers
 
                  Authorization: 1234Example
@@ -179,25 +180,32 @@ May be filtered with query parameters.
 
 ### Remove Session [DELETE]
 This operation removes a session from the collection.
-+  Request 
++  Request
     + Headers
 
                 Authorization: requestHeader
 
 + Response 204 (application/json)
 
+
+
+# Group Access
+Sign up for an API key to access the routes.
+
 # Data Structures
 
 ## Endpoint
-- name: endpoint (string, required)
+- games: /api/games (string, required)
+- sessions: /api/sessions (string, required)
+- members: /api/members (string, required)
 
 ## MemberWithStats
 - include MemberWithId
 - wins: 10 (number, required)
 - winRatio: 0.90 (number, required)
-- gamesPlayed: 9010 (number, required)
+- losses: 100 (number, required)
 - timesTraitor: 9000 (number, required)
-- traitorRatio: 0.33(number, required)
+- gamesPlayed: 9010 (number, required)
 
 ## MemberWithId (object)
 - id: 1 (number, required)
@@ -213,17 +221,17 @@ This operation removes a session from the collection.
 
 ## Game (object)
 - name: name of the game (required)
-- maxNumberOfPlayers: 6 (number, required)
-- traitor: boolean (string, required)
-- coop: boolean (string, required)
+- maxNumOfPlayers: 6 (number, required)
+- traitor: true (boolean, required)
+- coop: false (boolean, required)
 
 ## SessionWithId (object)
 - id: 1 (number, required)
 - gamePlayed: 1 (number, required)
 - date: 20/5/2017 (string, required)
-- winners (array[MemberWithId], required)
-- losers (array[MemberWithId], required)
-- traitors (array[MemberWithId], required)
+- winners (array[number], required)
+- losers (array[number], required)
+- traitors (array[number], required)
 
 ## Session (object)
 - gameID: 5 (number, required)
