@@ -14,9 +14,10 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
         try {
             val member = mapper.readValue<AddMember>(data)
             val id = dao.add(member)
-            logger.info { "added member ${member.firstName} ${member.lastName}" }
+            logger.info { "Added member ${member.firstName} ${member.lastName}" }
             return id.toString()
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Failed to add member, data was incorrect")
         }
     }
@@ -25,8 +26,10 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
         try {
             val member = mapper.readValue<AddMember>(data)
             dao.update(id.toInt(), member)
+            logger.info { "Updated member ${id}" }
             return id
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could not update member")
         }
     }
@@ -39,6 +42,7 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
           val offset = paramOrDefault(start, DEFAULT_OFFSET)
           return mapper.writeValueAsString(dao.get(limit, offset-1))
       } catch (e: Exception) {
+          logger.error { e.message }
           throw APIException("Could not get members ${e.message}")
       }
     }
@@ -48,6 +52,7 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
             val member = dao.getDetailed(id.toInt())
             return mapper.writeValueAsString(member)
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could not get member")
         }
     }
@@ -55,8 +60,9 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
     override fun removeWithID(id: String) {
         try {
             dao.delete(id.toInt())
-            logger.info { "Removed member $id" }
+            logger.info { "Removed member with $id" }
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could delete member")
         }
     }

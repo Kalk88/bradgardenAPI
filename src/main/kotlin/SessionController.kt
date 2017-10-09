@@ -17,7 +17,8 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
             logger.info { "Added Session" }
             return id.toString()
         } catch (e: Exception) {
-            throw APIException("")
+            logger.error { e.message }
+            throw APIException("Could not add session")
         }
     }
 
@@ -33,6 +34,7 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
             val offset = paramOrDefault(start, DEFAULT_OFFSET)
             return mapper.writeValueAsString(dao.get(limit, offset-1))
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could not retrieve sessions")
         }
     }
@@ -42,6 +44,7 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
             val session = dao.getDetailed(id.toInt())
             return mapper.writeValueAsString(session)
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could not retrieve session")
         }
     }
@@ -51,6 +54,7 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
             dao.delete(id.toInt())
             logger.info { "Deleted Session $id" }
         } catch (e: Exception) {
+            logger.error { e.message }
             throw APIException("Could not delete session")
         }
     }
