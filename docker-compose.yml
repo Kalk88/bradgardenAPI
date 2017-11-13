@@ -1,9 +1,11 @@
-version: '3.1'
+version: '2'
 services:
     db:
         image: postgres
         environment:
-            POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bradgarden
         container_name: bddb
         command: ADD dockerfiles/db/bradgardenDB.sql /docker-entrypoint-initdb.d/  
 

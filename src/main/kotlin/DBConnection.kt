@@ -1,6 +1,8 @@
+import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import java.util.Properties
 
 /**
  * Singelton, gives access to the database.
@@ -9,9 +11,14 @@ import java.sql.SQLException
 
 class DBConnection private constructor() {
     private val dburl : String
+    private val user : String
+    private val password : String
     init {
-        dburl = "jdbc:postgresql://localhost:5432/bradgarden?user=postgres&password=postgres"
-//        dburl = File("src/main/resources/db.txt").readText()
+        val properties = Properties()
+        properties.load(FileInputStream("src/main/resources/server.properties"))
+        dburl = "jdbc:postgresql://${properties.getProperty("DBURL")}"
+        user = properties.getProperty("DBUSER")
+        password = properties.getProperty("DBPASSWORD")
     }
     private object Holder { val INSTANCE = DBConnection()}
 
@@ -24,10 +31,11 @@ class DBConnection private constructor() {
      */
     fun open(): Connection {
         try {
-            val connection = DriverManager.getConnection(dburl)
+            val connection = DriverManager.getConnection(dburl, user, password)
             return connection
         } catch (e: SQLException) {
-            throw APIException("database connection error" + e.message)
+
+            throw APIException("database connection error ${e.message} $dburl")
         }
     }
 }
