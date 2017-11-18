@@ -1,7 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
@@ -39,19 +38,19 @@ class Server {
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
-//        before ("/api/*") {req, res ->
-//            try {
-//                val params = req.headers("Authorization").split(":")
-//                val user = params[0]
-//                val key = params[1]+
-//                logRequest(req.ip(), req.requestMethod(), user)
-//                if(!auth.authorize(key, req.body(), user)) {
-//                    throw APIException("Unauthorized request")
-//                }
-//            } catch (e: Exception) {
-//                logger.error { e.printStackTrace() }
-//                throw APIException("Unauthorized request") }
-//        }
+        before ("/api/*") {req, res ->
+            try {
+                val params = req.headers("Authorization").split(":")
+                val user = params[0]
+                val key = params[1]+
+                logRequest(req.ip(), req.requestMethod(), user)
+                if(!auth.authorize(key, req.body(), user)) {
+                    throw APIException("Unauthorized request")
+                }
+            } catch (e: Exception) {
+                logger.error { e.printStackTrace() }
+                throw APIException("Unauthorized request") }
+        }
 
         get(ENDPOINTS) { req, res ->
             buildResponse(body=mapper.writeValueAsString(publicEndpoints), response = res)
