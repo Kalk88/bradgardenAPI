@@ -1,9 +1,10 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
+import java.io.FileInputStream
+import java.util.*
 
 /**
  * Created by kalk on 7/5/17.
@@ -33,7 +34,11 @@ class Server {
         val memberController = MemberController(MemberDAO())
         val gameController = GameController(GameDAO())
         val sessionController = SessionController(SessionDAO())
-        port(8080)
+        val properties = Properties()
+        properties.load(FileInputStream("src/main/resources/server.properties"))
+        ipAddress(properties.getProperty("SERVERIP"))
+        port(properties.getProperty("SERVERPORT").toInt())
+
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
