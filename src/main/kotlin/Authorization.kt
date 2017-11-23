@@ -33,6 +33,7 @@ class Authorization {
     fun authorize(requestKey: String, message: String, user: String): Boolean {
         val token = users[user] ?: throw APIException("User not found")
         val dbKey = calculateHMAC(message,token)
+        logger.info { "$requestKey == $dbKey ${requestKey == dbKey} "  }
         return (requestKey == dbKey)
     }
 

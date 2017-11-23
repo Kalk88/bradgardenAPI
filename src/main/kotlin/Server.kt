@@ -47,10 +47,10 @@ class Server {
             try {
                 val params = req.headers("Authorization").split(":")
                 val user = params[0]
-                val key = params[1]+
+                val key = params[1]
                 logRequest(req.ip(), req.requestMethod(), user)
                 if(!auth.authorize(key, req.body(), user)) {
-                    logger.error { "$user, $key and ${req.body()} invalid" }
+                    logger.error {"$user, $key and ${req.body()} invalid" }
                     throw APIException("Unauthorized request")
                 }
             } catch (e: Exception) {
