@@ -68,7 +68,7 @@ class Server {
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
-        
+
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
             val members = memberController.getFromParams(params)
