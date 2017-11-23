@@ -44,18 +44,21 @@ class Server {
             res.header("Access-Control-Allow-Origin", "*")
         }
         before ("/api/*") {req, res ->
-            try {
-                val params = req.headers("Authorization").split(":")
-                val user = params[0]
-                val key = params[1]
-                logRequest(req.ip(), req.requestMethod(), user)
-                if(!auth.authorize(key, req.body(), user)) {
-                    logger.error {"$user, $key and ${req.body()} invalid" }
-                    throw APIException("Unauthorized request")
-                }
-            } catch (e: Exception) {
-                logger.error { e.printStackTrace() }
-                throw APIException("Unauthorized request") }
+          if(req.requestMethod() != "GET")
+            {
+              try {
+                  val params = req.headers("Authorization").split(":")
+                  val user = params[0]
+                  val key = params[1]
+                  logRequest(req.ip(), req.requestMethod(), user)
+                  if(!auth.authorize(key, req.body(), user)) {
+                      logger.error {"$user, $key and ${req.body()} invalid" }
+                      throw APIException("Unauthorized request")
+                  }
+              } catch (e: Exception) {
+                  logger.error { e.printStackTrace() }
+                  throw APIException("Unauthorized request") }
+            }
         }
 
         get(ENDPOINTS) { req, res ->
