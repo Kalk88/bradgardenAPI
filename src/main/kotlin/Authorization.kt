@@ -37,7 +37,7 @@ class Authorization {
         return (requestKey == dbKey)
     }
 
-    fun calculateHMAC(data: String, key: String): String {
+    private fun calculateHMAC(data: String, key: String): String {
         val secretKeySpec = SecretKeySpec(key.toByteArray(), HMAC_SHA1)
         val mac = Mac.getInstance(HMAC_SHA1)
         mac.init(secretKeySpec)
@@ -51,27 +51,4 @@ class Authorization {
         }
         return formatter.toString()
     }
-
-    /**
-     * @return secret id for name
-     */
-    fun addUser(user: String, email: String): String {
-        val connection = DBConnection.instance.open()
-    try {
-            val secret = UUID.randomUUID().toString()
-            val stmt = connection.prepareStatement("insert into api_user (name, email, secret) values (?,?,?)")
-            stmt.setString(1, user)
-            stmt.setString(2, email)
-            stmt.setString(3, secret)
-            stmt.execute()
-            users[user] = secret
-            return secret
-        } catch (e: Exception) {
-            logger.error("${e.message}")
-            throw APIException("Key generation error")
-        } finally {
-            DbUtils.close(connection)
-        }
-    }
 }
-data class apiUser(val name: String, val email: String)

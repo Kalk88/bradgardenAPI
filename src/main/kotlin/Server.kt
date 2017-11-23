@@ -139,13 +139,6 @@ class Server {
             res.body()
         }
 
-        post("/api/admin/generate") { req, res ->
-            val user = mapper.readValue<apiUser>(req.body())
-            val secret = auth.addUser(user.name, user.email)
-            buildResponse(statusCode = HTTP_CREATED, body=toJSON("secret", secret),response = res)
-            res.body()
-        }
-
         exception(APIException::class.java, { exception, req, res ->
             val message = exception.message ?: "error with request"
             buildResponse(statusCode= HTTP_BAD_REQUEST, body = toJSON("error_message", message), response = res)
