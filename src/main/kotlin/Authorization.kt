@@ -28,7 +28,6 @@ class Authorization {
         } finally {
             DbUtils.close(connection)
         }
-        logger.info("Authorization init successful")
     }
 
     fun authorize(requestKey: String, message: String, user: String): Boolean {

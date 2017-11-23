@@ -50,6 +50,7 @@ class Server {
                 val key = params[1]+
                 logRequest(req.ip(), req.requestMethod(), user)
                 if(!auth.authorize(key, req.body(), user)) {
+                    logger.error { "$user, $key and ${req.body()} invalid" }
                     throw APIException("Unauthorized request")
                 }
             } catch (e: Exception) {
@@ -67,8 +68,7 @@ class Server {
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
-
-
+        
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
             val members = memberController.getFromParams(params)
