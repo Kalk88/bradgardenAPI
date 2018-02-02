@@ -111,6 +111,11 @@ class MemberDAO(val db: Database): MemberDAOInterface {
         }
         return member
     }
+
+    override fun getAll(): ArrayList<Member> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }
 
 data class AddMember(val firstName: String, val lastName: String) {

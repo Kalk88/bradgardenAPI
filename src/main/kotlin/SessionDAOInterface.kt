@@ -3,4 +3,5 @@ interface SessionDAOInterface {
     fun delete(id: Int): Boolean
     fun get(limit: Int = 100, offset:Int = 0): ArrayList<LightSession>
     fun getDetailed(id: Int): Session
+    fun getAll(): ArrayList<LightSession>
 }

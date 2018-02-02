@@ -3,12 +3,13 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.ArrayList
+import kotlin.collections.ArrayList
 
 /**
  * Created by kalk on 6/20/17.
  */
 class SessionDAO(val db: Database): SessionDAOInterface {
+
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
     override fun add(session: AddSession): Int {
@@ -81,6 +82,10 @@ class SessionDAO(val db: Database): SessionDAOInterface {
         } finally {
             DbUtils.close(con)
         }
+    }
+
+    override fun getAll(): ArrayList<LightSession> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun delete(id: Int): Boolean {

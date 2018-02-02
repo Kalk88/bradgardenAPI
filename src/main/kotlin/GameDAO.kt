@@ -1,11 +1,13 @@
 import mu.KLogging
 import org.apache.commons.dbutils.DbUtils
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by kalk on 6/20/17.
  */
 class GameDAO(val db: Database): GameDAOInterface  {
+
     companion object: KLogging()
 
     override fun add(game: AddGame): Int {
@@ -72,6 +74,10 @@ class GameDAO(val db: Database): GameDAOInterface  {
     override fun getDetailed(id: Int): Game {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         return Game(-1, "dummy",0,false,false)
+    }
+
+    override fun getAll(): ArrayList<Game> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
    override fun delete(id: Int): Boolean{
