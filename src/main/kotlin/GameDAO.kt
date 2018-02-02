@@ -6,7 +6,7 @@ import kotlin.collections.ArrayList
 /**
  * Created by kalk on 6/20/17.
  */
-class GameDAO(val db: Database): GameDAOInterface  {
+class GameDAO(private val db: Database): GameDAOInterface  {
 
     companion object: KLogging()
 

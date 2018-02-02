@@ -23,7 +23,7 @@ class DBConnection private constructor(): Database {
     private object Holder { val INSTANCE = DBConnection()}
 
     companion object {
-        val instance: DBConnection by lazy { Holder.INSTANCE }
+        val instance: Database by lazy { Holder.INSTANCE }
     }
 
     /**

@@ -8,7 +8,7 @@ import kotlin.collections.ArrayList
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO(val db: Database): SessionDAOInterface {
+class SessionDAO(private val db: Database): SessionDAOInterface {
 
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 

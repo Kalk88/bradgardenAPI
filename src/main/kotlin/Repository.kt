@@ -39,16 +39,7 @@ class Repository(val db: Database) {
     }
 
      fun getMemberFromParams(params: HashMap<String, String>): String {
-        try {
-            val size = params["pageSize"]?.toInt() ?: -1
-            val start = params["pageStart"]?.toInt() ?: -1
-            val limit = paramOrDefault(size, DEFAULT_LIMIT)
-            val offset = paramOrDefault(start, DEFAULT_OFFSET)
-            return mapper.writeValueAsString(memberDAO.get(limit, offset-1))
-        } catch (e: Exception) {
-            logger.error { e.message }
-            throw APIException("Could not get members ${e.message}")
-        }
+        TODO()
     }
 
     fun getMemberByID(id: String): String {
@@ -136,16 +127,7 @@ class Repository(val db: Database) {
     }
 
     fun getSessionFromParams(params: HashMap<String, String>): String {
-        try {
-            val size = params["pageSize"]?.toInt() ?: -1
-            val start = params["pageStart"]?.toInt() ?: -1
-            val limit = paramOrDefault(size, DEFAULT_LIMIT)
-            val offset = paramOrDefault(start, DEFAULT_OFFSET)
-            return mapper.writeValueAsString(sessionDAO.get(limit, offset-1))
-        } catch (e: Exception) {
-            logger.error { e.message }
-            throw APIException("Could not retrieve sessions")
-        }
+       TODO()
     }
 
    fun getSessionByID(id: String): String {

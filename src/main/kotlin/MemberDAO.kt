@@ -5,7 +5,7 @@ import org.apache.commons.dbutils.DbUtils
 /**
  * Created by kalk on 6/20/17.
  */
-class MemberDAO(val db: Database): MemberDAOInterface {
+class MemberDAO(private val db: Database): MemberDAOInterface {
 
     override fun add(member: AddMember): Int {
         var id: Int
@@ -113,7 +113,25 @@ class MemberDAO(val db: Database): MemberDAOInterface {
     }
 
     override fun getAll(): ArrayList<Member> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val members = ArrayList<Member>()
+        val con = db.open()
+        try {
+            val stmt = con.prepareStatement("select * from member")
+            val rs = stmt.executeQuery()
+            while(rs.next()) {
+                val wins = rs.getInt(3)
+                val losses = rs.getInt(4)
+                val total = wins + losses
+                members.add(Member(id = rs.getInt(6), firstName = rs.getString(1), lastName = rs.getString(2),
+                        wins = wins, winRatio = wins.toDouble() / total, losses = losses,
+                        timesTraitor = rs.getInt(5), gamesPlayed = total))
+            }
+        } catch (e: Exception) {
+            throw APIException("${e.message}")
+        } finally {
+            DbUtils.close(con)
+        }
+        return members
     }
 
 }
