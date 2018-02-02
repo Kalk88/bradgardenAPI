@@ -24,7 +24,7 @@ This operation adds a member to the collection. It take the first and last name 
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(Member)
+    + Attributes(Member1)
 
 + Response 201 (application/json)
     + Headers
@@ -45,7 +45,7 @@ This operation retrives an array of members.
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes (array[MemberWithStats, MemberWithStats])
+    + Attributes (array[MemberWithStats1, MemberWithStats2, MemberWithStats3 ])
 
 ### Single Member [/api/members/{id}]
 + Parameters
@@ -59,7 +59,7 @@ This operation retrive a single member with more information than get members.
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes (array[MemberWithStats])
+    + Attributes (array[MemberWithStats1])
 
 ### Update Member [PUT]
 This operation updates a member in the collection.
@@ -67,7 +67,7 @@ This operation updates a member in the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(MemberWithId)
+    + Attributes(MemberWithId1)
 
 + Response 204
     + Headers
@@ -199,21 +199,53 @@ Sign up for an API key to access the routes.
 - sessions: /api/sessions (string, required)
 - members: /api/members (string, required)
 
-## MemberWithStats
-- include MemberWithId
+## MemberWithStats1
+- include MemberWithId1
 - wins: 10 (number, required)
 - winRatio: 0.90 (number, required)
 - losses: 100 (number, required)
 - timesTraitor: 9000 (number, required)
 - gamesPlayed: 9010 (number, required)
 
-## MemberWithId (object)
-- id: 1 (number, required)
-- include Member
+## MemberWithStats2
+- include MemberWithId2
+- wins: 10 (number, required)
+- winRatio: 0.90 (number, required)
+- losses: 100 (number, required)
+- timesTraitor: 9000 (number, required)
+- gamesPlayed: 9010 (number, required)
 
-## Member (object)
+## MemberWithStats3
+- include MemberWithId3
+- wins: 10 (number, required)
+- winRatio: 0.90 (number, required)
+- losses: 100 (number, required)
+- timesTraitor: 9000 (number, required)
+- gamesPlayed: 9010 (number, required)
+
+## MemberWithId1 (object)
+- id: 1 (number, required)
+- include Member1
+
+## MemberWithId2 (object)
+- id: 2 (number, required)
+- include Member2
+
+## MemberWithId3 (object)
+- id: 3 (number, required)
+- include Member3
+
+## Member1 (object)
 - firstName: Jens (required)
 - lastName: Johnny (required)
+
+## Member2 (object)
+- firstName: Carl (required)
+- lastName:  Conny (required)
+
+## Member3 (object)
+- firstName: Lars (required)
+- lastName: Lök (required)
 
 ## GameWithId (object)
 - id: 1 (number, required)
