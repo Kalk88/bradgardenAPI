@@ -8,12 +8,12 @@ import java.util.ArrayList
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO: SessionDAOInterface {
+class SessionDAO(val db: Database): SessionDAOInterface {
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
     override fun add(session: AddSession): Int {
         val sessionID: Int
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             val insertSession  = "insert into game_session (game, session_date) values (?, ?) returning session_id"
             val winnerStatement = "insert into winner values (?, ?)"
@@ -40,7 +40,7 @@ class SessionDAO: SessionDAOInterface {
 
     override fun get(limit:Int, offset:Int): ArrayList<LightSession> {
         val sessions = ArrayList<LightSession>()
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
             stmt.setInt(1, limit)
@@ -63,7 +63,7 @@ class SessionDAO: SessionDAOInterface {
         val getLosers =   "select member from loser where game_session = ?"
         val getTraitors = "select member from traitor where game_session = ?"
         var session: PreparedStatement
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             session = con.prepareStatement(getSession)
             session.setInt(1, id)
@@ -84,7 +84,7 @@ class SessionDAO: SessionDAOInterface {
     }
 
     override fun delete(id: Int): Boolean {
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             val stmt = con.prepareStatement("delete from game_session where session_id = ?")
             stmt.setInt(1, id)

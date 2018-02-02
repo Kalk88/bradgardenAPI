@@ -5,12 +5,12 @@ import java.util.*
 /**
  * Created by kalk on 6/20/17.
  */
-class GameDAO: GameDAOInterface  {
+class GameDAO(val db: Database): GameDAOInterface  {
     companion object: KLogging()
 
     override fun add(game: AddGame): Int {
         var gameId: Int
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try{
             val stmt = con.prepareStatement("insert into game (game_name, max_Players, traitor, co_op) values (?,?,?,?) returning game_id")
             stmt.setString(1,game.name)
@@ -30,7 +30,7 @@ class GameDAO: GameDAOInterface  {
     }
 
     override fun update(id: Int, game: AddGame): Boolean {
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try{
             val stmt = con.prepareStatement("update game set game_name = ?, max_Players = ?, traitor = ?, co_op = ? where game_id = $id")
             stmt.setString(1, game.name)
@@ -50,7 +50,7 @@ class GameDAO: GameDAOInterface  {
 
     override fun get(limit: Int, offset:Int): ArrayList<Game> {
         val games = ArrayList<Game>()
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try{
             val stmt =  con.prepareStatement("select * from game limit ? offset ?")
             stmt.setInt(1, limit)
@@ -75,7 +75,7 @@ class GameDAO: GameDAOInterface  {
     }
 
    override fun delete(id: Int): Boolean{
-        val con = DBConnection.instance.open()
+       val con = db.open()
         try{
             val stmt = con.prepareStatement("delete from game where game_id = ?")
             stmt.setInt(1,id)
