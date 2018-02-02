@@ -92,7 +92,7 @@ This operation adds a game to the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(Game)
+    + Attributes(Game1)
 
 + Response 201 (application/json)
     + Headers
@@ -113,7 +113,7 @@ This operation retrives a list of board games. may be filtered with query parame
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes(array[GameWithId,GameWithId])
+    + Attributes(array[GameWithId1,GameWithId1])
 
 ## Single Game [/api/games/{id}]
 + Parameters
@@ -125,7 +125,7 @@ This operation updates a game in the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes (Game)
+    + Attributes (Game1)
 
 + Response 204
     + Headers
@@ -247,15 +247,37 @@ Sign up for an API key to access the routes.
 - firstName: Lars (required)
 - lastName: Lök (required)
 
-## GameWithId (object)
+## GameWithId1 (object)
 - id: 1 (number, required)
-- include Game
+- include Game1
 
-## Game (object)
-- name: name of the game (required)
-- maxNumOfPlayers: 6 (number, required)
-- traitor: true (boolean, required)
+## GameWithId2 (object)
+- id: 2 (number, required)
+- include Game2
+
+## GameWithId3 (object)
+- id: 3 (number, required)
+- include Game3
+
+## Game1 (object)
+- name: Ticket To Ride (required)
+- maxNumOfPlayers: 5 (number, required)
+- traitor: false (boolean, required)
 - coop: false (boolean, required)
+
+## Game2 (object)
+- name: Shadows over Camelot (required)
+- maxNumOfPlayers: 8 (number, required)
+- traitor: true (boolean, required)
+- coop: true (boolean, required)
+
+
+## Game3 (object)
+- name: Twilight Imperium 4 (required)
+- maxNumOfPlayers: 6 (number, required)
+- traitor: false (boolean, required)
+- coop: false (boolean, required)
+
 
 ## SessionWithId (object)
 - id: 1 (number, required)
