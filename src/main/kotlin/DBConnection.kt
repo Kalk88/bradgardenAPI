@@ -9,7 +9,7 @@ import java.util.Properties
  * Created by kalk on 6/22/17.
  */
 
-class DBConnection private constructor() {
+class DBConnection private constructor(): Database {
     private val dburl : String
     private val user : String
     private val password : String
@@ -29,12 +29,11 @@ class DBConnection private constructor() {
     /**
      * @Return a connection to the database.
      */
-    fun open(): Connection {
+    override fun open(): Connection {
         try {
             val connection = DriverManager.getConnection(dburl, user, password)
             return connection
         } catch (e: SQLException) {
-
             throw APIException("database connection error ${e.message} $dburl")
         }
     }
