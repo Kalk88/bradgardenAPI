@@ -12,7 +12,7 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
 
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
-    override fun add(session: AddSession): Int {
+    override fun add(session: Session): Int {
         val sessionID: Int
         val con = db.open()
         try {
@@ -39,8 +39,8 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
         return sessionID
     }
 
-    override fun get(limit:Int, offset:Int): ArrayList<LightSession> {
-        val sessions = ArrayList<LightSession>()
+    override fun get(limit:Int, offset:Int): ArrayList<Session> {
+        val sessions = ArrayList<Session>()
         val con = db.open()
         try {
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
@@ -48,7 +48,8 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
             stmt.setInt(2, offset)
             val rs = stmt.executeQuery()
             while (rs.next()) {
-                sessions.add(LightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+              //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+                TODO()
             }
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -84,7 +85,7 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
         }
     }
 
-    override fun getAll(): ArrayList<LightSession> {
+    override fun getAll(): ArrayList<Session> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -124,6 +125,5 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
         return list
     }
 }
-data class LightSession(val id: Int, val date: String, val gameID: Int)
-data class AddSession(val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
-data class Session(val id: Int, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
+
+data class Session(val id: Int = -1, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)

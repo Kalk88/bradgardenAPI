@@ -10,7 +10,7 @@ class GameDAO(private val db: Database): GameDAOInterface  {
 
     companion object: KLogging()
 
-    override fun add(game: AddGame): Int {
+    override fun add(game: Game): Int {
         var gameId: Int
         val con = db.open()
         try{
@@ -31,7 +31,7 @@ class GameDAO(private val db: Database): GameDAOInterface  {
         return gameId
     }
 
-    override fun update(id: Int, game: AddGame): Boolean {
+    override fun update(id: Int, game: Game): Boolean {
         val con = db.open()
         try{
             val stmt = con.prepareStatement("update game set game_name = ?, max_Players = ?, traitor = ?, co_op = ? where game_id = $id")
@@ -80,8 +80,8 @@ class GameDAO(private val db: Database): GameDAOInterface  {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-   override fun delete(id: Int): Boolean{
-       val con = db.open()
+    override fun delete(id: Int): Boolean{
+        val con = db.open()
         try{
             val stmt = con.prepareStatement("delete from game where game_id = ?")
             stmt.setInt(1,id)
@@ -96,12 +96,10 @@ class GameDAO(private val db: Database): GameDAOInterface  {
     }
 }
 
-data class Game(val id: Int, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean)
-data class AddGame(val name: String, val maxNumOfPlayers: Int,val traitor: Boolean,val coop: Boolean) {
+data class Game(val id: Int = -1, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean) {
     init {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
         require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
     }
 }
-
 

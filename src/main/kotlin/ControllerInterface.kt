@@ -1,6 +1,6 @@
 interface ControllerInterface <T> {
-    fun add(data: String): String
-    fun update(id: String, data: String): String
+    fun add(data: T): String
+    fun update(id: String, data: T): String
     fun getFromParams(params: HashMap<String, String>): String
     fun getFromID(id: String): String
     fun removeWithID(id: String)

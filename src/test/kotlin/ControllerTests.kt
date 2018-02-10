@@ -4,10 +4,9 @@ import org.junit.Assert.*
 
 class ControllerTests {
 
-    private fun dummy (id:Int): Member { return Member(id, "dummy", "test", 100, 1.0, 0, 0, 100) }
-    private fun dummyGame (id:Int): Game { return Game(id, "dummy", 100, true, true) }
+    private fun dummyMember(id:Int, first:String = "Anthony", last:String = "Dankfano"): Member { return Member(id, first, last, 100, 1.0, 0, 0, 100) }
+    private fun dummyGame (id:Int, name:String = "dummy"): Game { return Game(id, name, 100, true, true) }
     private fun dummySession(id: Int): Session {return Session(id, "date", 1, listOf(1,2,3), listOf(3,2,1), listOf(1))}
-    private fun dummyLightSession(id: Int): LightSession {return LightSession(id, "date", 1)}
 
     @Test fun creates_a_memberController() {
         val mock = mock<MemberDAOInterface>()
@@ -16,84 +15,67 @@ class ControllerTests {
 
     @Test fun should_add_member() {
         val mock = mock<MemberDAOInterface> {
-            on {add(AddMember("Anthony", "Dankfano"))} doReturn 1
+            on {add(dummyMember(0))} doReturn 1
         }
-        val data = """{ "firstName": "Anthony", "lastName": "Dankfano" }"""
+        val data = dummyMember(0)
         val controller = MemberController(mock)
         assertEquals(controller.add(data),"1")
     }
 
-    @Test (expected = APIException::class)
+    @Test (expected = IllegalArgumentException::class)
     fun should_not_add_member_when_name_is_too_short() {
         val mock = mock<MemberDAOInterface>()
         val controller = MemberController(mock)
-        val data = """{ "firstName": "fail", "lastName": "" }"""
-        controller.add(data)
+        controller.add(dummyMember(0, first = "fail", last = ""))
     }
 
-    @Test (expected = APIException::class)
-    fun should_not_add_member_when_field_is_missing() {
-        val mock = mock<MemberDAOInterface>()
-        val controller = MemberController(mock)
-        val data = """{ "firstName": "fail"}"""
-        controller.add(data)
-    }
 
     @Test fun should_update_member() {
         val mock = mock<MemberDAOInterface> {
-            on {update(1, AddMember("Anthony", "Dankfano"))} doReturn (true)
+            on {update(1, dummyMember(id=1, last="Updatefano"))} doReturn (true)
         }
-        val data = """{ "firstName": "Anthony", "lastName": "Updatefano" }"""
         val controller = MemberController(mock)
-        assertEquals(controller.update("1", data), "1")
+        assertEquals(controller.update("1", dummyMember(1, first = "Anthony", last = "Updatefano")), "1")
 
     }
 
     @Test  (expected = APIException::class)
     fun should_not_update_member_when_invalid_ID_cannot_be_converted_to_INT() {
         val mock = mock<MemberDAOInterface>()
-        val data = """{ "firstName": "Anthony", "lastName": "Updatefano" }"""
         val controller = MemberController(mock)
-        controller.update("wrong", data)
+        controller.update("wrong", dummyMember(0))
     }
 
-    @Test  (expected = APIException::class)
-    fun should_fail_when_member_data_is_invalid() {
-        val mock = mock<MemberDAOInterface>()
-        val data = """{ "firstName": "fail"}"""
-        val controller = MemberController(mock)
-        controller.update("1", data)
-    }
 
     @Test fun should_return_a_list_of_members() {
-        val mocklist = arrayListOf(dummy(1), dummy(2))
+        val mocklist = arrayListOf(dummyMember(1), dummyMember(2))
         val mock = mock<MemberDAOInterface> {
             on {get()} doReturn mocklist
         }
         val controller = MemberController(mock)
         val params = hashMapOf<String, String>()
         val membersAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
+        assertEquals("""[{"id":1,"firstName":"Anthony","lastName":"Dankfano","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"Anthony","lastName":"Dankfano","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
     }
 
     @Test fun should_return_a_list_of_members_when_queryparam_are_zero() {
-        val mocklist = arrayListOf(dummy(1), dummy(2))
+        val mocklist = arrayListOf(dummyMember(1), dummyMember(2))
         val mock = mock<MemberDAOInterface> {
             on {get(100,0)} doReturn mocklist
         }
         val controller = MemberController(mock)
         val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
         val membersAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
+        assertEquals("""[{"id":1,"firstName":"Anthony","lastName":"Dankfano","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100},{"id":2,"firstName":"Anthony","lastName":"Dankfano","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}]""", membersAsString)
     }
 
     @Test fun should_return_member_from_ID() {
         val mock = mock<MemberDAOInterface> {
-            on {getDetailed(2)} doReturn dummy(2)
+            on {getDetailed(2)} doReturn dummyMember(2)
         }
         val controller = MemberController(mock)
         val membersAsString = controller.getFromID("2")
-        assertEquals("""{"id":2,"firstName":"dummy","lastName":"test","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}""", membersAsString)
+        assertEquals("""{"id":2,"firstName":"Anthony","lastName":"Dankfano","wins":100,"winRatio":1.0,"losses":0,"timesTraitor":0,"gamesPlayed":100}""", membersAsString)
     }
 
     @Test  (expected = APIException::class)
@@ -125,76 +107,61 @@ class ControllerTests {
 
     @Test fun should_add_a_game() {
         val mock = mock<GameDAOInterface> {
-            on {add(AddGame("game",6,false,true))} doReturn 1
+            on {add(dummyGame(0))} doReturn 1
         }
-        val data = """{ "name": "game","maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
         val controller = GameController(mock)
-        assertEquals(controller.add(data),"1")
+        assertEquals(controller.add(dummyGame(0)),"1")
     }
 
 
-    @Test (expected = APIException::class)
+    @Test (expected = IllegalArgumentException::class)
     fun should_not_add_game_when_name_is_too_short() {
         val mock = mock<GameDAOInterface>()
         val controller = GameController(mock)
-        val data = """{ "name": "g","maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
-        controller.add(data)
-    }
-
-    @Test (expected = APIException::class)
-    fun should_not_add_game_when_field_is_missing() {
-        val mock = mock<GameDAOInterface>()
-        val controller = GameController(mock)
-        val data =  """{ "maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
-        controller.add(data)
+        controller.add(dummyGame(0, "g"))
     }
 
     @Test fun should_update_game() {
         val mock = mock<GameDAOInterface> {
-            on {update(1, AddGame("updategame",6,false,true))} doReturn (true)
+            on {update(1, dummyGame(1, "updategame"))} doReturn (true)
         }
-        val data = """{ "name": "updategame","maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
         val controller = GameController(mock)
-        assertEquals(controller.update("1", data), "1")
+        assertEquals(controller.update("1", dummyGame(1, "updategame")), "1")
 
     }
 
     @Test  (expected = APIException::class)
     fun should_not_update_game_when_invalid_ID_cannot_be_converted_to_INT() {
-        val mock = mock<MemberDAOInterface>()
-        val data = """{ "name": "updategame","maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
-        val controller = MemberController(mock)
-        controller.update("wrong", data)
+        val mock = mock<GameDAOInterface>()
+        val controller = GameController(mock)
+        controller.update("wrong", dummyGame(1))
     }
 
-    @Test  (expected = APIException::class)
+    @Test  (expected = IllegalArgumentException::class)
     fun should_fail_when_game_data_is_invalid() {
         val mock = mock<GameDAOInterface>()
         val controller = GameController(mock)
-        val data = """{ "name": "g","maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
-        controller.update("1",data)
+        controller.update("1",dummyGame(1, "g"))
     }
 
     @Test fun should_return_a_list_of_games() {
-        val mocklist = arrayListOf(dummyGame(1), dummyGame(2))
         val mock = mock<GameDAOInterface> {
-            on {get()} doReturn mocklist
+            on {get()} doReturn arrayListOf(dummyGame(1), dummyGame(2))
         }
         val controller = GameController(mock)
         val params = hashMapOf<String, String>()
         val gamesAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""", gamesAsString)
+        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""".trimMargin(), gamesAsString)
     }
 
     @Test fun should_return_a_list_of_games_when_queryparam_are_zero() {
-        val mocklist = arrayListOf(dummyGame(1), dummyGame(2))
         val mock = mock<GameDAOInterface> {
-            on {get(100,0)} doReturn mocklist
+            on {get(100,0)} doReturn arrayListOf(dummyGame(1), dummyGame(2))
         }
         val controller = GameController(mock)
         val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
         val gamesAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""", gamesAsString)
+        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""".trimMargin(), gamesAsString)
     }
 
     @Test fun should_return_game_from_ID() {
@@ -235,49 +202,39 @@ class ControllerTests {
 
     @Test fun should_add_a_session() {
         val mock = mock<SessionDAOInterface> {
-            on {add(AddSession(1, listOf<Int>(1),listOf<Int>(2,3,4),listOf<Int>(1)))} doReturn 1
+            on {add(dummySession(0))} doReturn 1
         }
-        val data ="""{ "gameID":"1","winners": ["1"], "losers": ["2","3","4"], "traitors": ["1"] }"""
         val controller = SessionController(mock)
-        assertEquals(controller.add(data),"1")
+        assertEquals(controller.add(dummySession(0)),"1")
     }
 
-    @Test (expected = APIException::class)
-    fun should_not_add_session_when_field_is_missing() {
-        val mock = mock<SessionDAOInterface>()
-        val controller = SessionController(mock)
-        val data =  """{ "maxNumOfPlayers": "6","traitor": "false","coop": "true" }"""
-        controller.add(data)
-    }
 
     @Test (expected = APIException::class)
     fun should_never_be_able_to_update_a_session() {
         val mock = mock<SessionDAOInterface>()
         val controller = SessionController(mock)
-        controller.update("nope", "never")
+        controller.update("nope", dummySession(0))
     }
 
     @Test fun should_return_a_list_of_sessions() {
-        val mocklist = arrayListOf(dummyLightSession(1), dummyLightSession(2))
         val mock = mock<SessionDAOInterface> {
-            on {get()} doReturn mocklist
+            on {get()} doReturn  arrayListOf(dummySession(1), dummySession(2))
         }
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>()
         val sessionsAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"date":"date","gameID":1},{"id":2,"date":"date","gameID":1}]""", sessionsAsString)
+        assertEquals("""[{"id":1,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""".trimMargin(), sessionsAsString)
     }
 
 
     @Test fun should_return_a_list_of_sessions_when_queryparam_are_zero() {
-        val mocklist = arrayListOf(dummyLightSession(1), dummyLightSession(2))
         val mock = mock<SessionDAOInterface> {
-            on {get()} doReturn mocklist
+            on {get()} doReturn arrayListOf (dummySession(1), dummySession(2))
         }
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
         val sessionsAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"date":"date","gameID":1},{"id":2,"date":"date","gameID":1}]""", sessionsAsString)
+        assertEquals("""[{"id":1,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""", sessionsAsString)
     }
 
     @Test fun should_return_session_from_ID() {

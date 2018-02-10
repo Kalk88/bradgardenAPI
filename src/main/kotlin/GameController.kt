@@ -10,9 +10,9 @@ class GameController(dao: GameDAOInterface): ControllerInterface<Game> {
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(game: Game): String {
         try {
-            val game = mapper.readValue<AddGame>(data)
+
             val id = dao.add(game)
             logger.info {"Added game ${game.name}"}
             return id.toString()
@@ -22,9 +22,9 @@ class GameController(dao: GameDAOInterface): ControllerInterface<Game> {
         }
     }
 
-    override fun update(id: String, data: String): String {
+    override fun update(id: String, game: Game): String {
         try {
-            val game = mapper.readValue<AddGame>(data)
+
             dao.update(id.toInt(), game)
             logger.info {"Update game ${game.name}"}
             return id //TODO what to return?

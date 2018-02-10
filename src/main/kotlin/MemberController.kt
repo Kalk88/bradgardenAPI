@@ -4,15 +4,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
 class MemberController(dao: MemberDAOInterface) : ControllerInterface<Member> {
+
     companion object: KLogging()
     private val dao: MemberDAOInterface = dao
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(member: Member): String {
         try {
-            val member = mapper.readValue<AddMember>(data)
+
             val id = dao.add(member)
             logger.info { "Added member ${member.firstName} ${member.lastName}" }
             return id.toString()
@@ -22,9 +23,8 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface<Member> {
         }
     }
 
-    override fun update(id: String, data: String): String {
+    override fun update(id: String, member: Member): String {
         try {
-            val member = mapper.readValue<AddMember>(data)
             dao.update(id.toInt(), member)
             logger.info { "Updated member ${id}" }
             return id

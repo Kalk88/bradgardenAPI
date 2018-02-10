@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
@@ -26,8 +27,8 @@ class APIException(message: String) : Exception(message)
 
 class Server {
     companion object: KLogging()
-    fun start() {
 
+    fun start() {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val auth = Authorization()
@@ -65,7 +66,8 @@ class Server {
         }
 
         post(MEMBERS) { req, res ->
-            val id = repository.addMember(req.body())
+            val member = mapper.readValue<Member>(req.body())
+            val id = repository.add(member)
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
@@ -84,7 +86,7 @@ class Server {
         }
 
         put(MEMBER_ID) { req, res ->
-            repository.updateMember(req.params(":id"), req.body())
+            repository.update(req.params(":id"), req.body())
             buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
             res.body()
         }
@@ -96,7 +98,8 @@ class Server {
         }
 
         post(GAMES) { req, res ->
-            val id = repository.addGame(req.body())
+            val game = mapper.readValue<Game>(req.body())
+            val id = repository.add(game)
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
@@ -109,7 +112,8 @@ class Server {
         }
 
         put(GAME_ID) { req, res ->
-            repository.updateGame(req.params(":id"), req.body())
+            val game = mapper.readValue<Game>(req.body())
+            repository.update(req.params(":id"), game)
             buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
             res.body()
         }
@@ -121,7 +125,8 @@ class Server {
         }
 
         post(SESSIONS) { req, res ->
-            val id = repository.addSession(req.body())
+            val session = mapper.readValue<Session>(req.body())
+            val id = repository.add(session)
             buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }

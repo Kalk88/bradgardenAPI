@@ -11,9 +11,9 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface<
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(session: Session): String {
         try {
-            val session = mapper.readValue<AddSession>(data)
+
             val id = dao.add(session)
             logger.info { "Added Session" }
             return id.toString()
@@ -23,7 +23,7 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface<
         }
     }
 
-    override fun update(id: String, data: String): String {
+    override fun update(id: String, data: Session): String {
         throw APIException("Cannot update a session. ARE U TRYIN TO CHEAT?")
     }
 

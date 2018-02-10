@@ -14,11 +14,12 @@ class Repository(val db: Database) {
     var sessions = sessionController.getAll()
 
 
-    fun addMember(data: String): String {
-        TODO()
+    fun add(member:Member): String {
+        val id = memberController.add(member)
+        return id
     }
 
-    fun updateMember(id: String, data: String): String {
+    fun update(id: String, data: String): String {
         TODO()
     }
 
@@ -34,11 +35,11 @@ class Repository(val db: Database) {
         TODO()
     }
 
-    fun addGame(data: String): String {
+    fun add(game:Game): String {
         TODO()
     }
 
-    fun updateGame(id: String, data: String): String {
+    fun update(id: String, game: Game): String {
         TODO()
     }
 
@@ -54,7 +55,7 @@ class Repository(val db: Database) {
         TODO()
     }
 
-    fun addSession(data: String): String {
+    fun add(data: Session): String {
         TODO()
     }
 
