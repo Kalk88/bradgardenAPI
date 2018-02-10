@@ -8,7 +8,7 @@ import kotlin.collections.ArrayList
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO(private val db: Database): SessionDAOInterface {
+class SessionDAO(private val db: Database): DAOInterface<Session> {
 
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
@@ -38,6 +38,11 @@ class SessionDAO(private val db: Database): SessionDAOInterface {
         }
         return sessionID
     }
+
+    override fun update(id: Int, data: Session): Boolean {
+        return false //No to be used
+    }
+
 
     override fun get(limit:Int, offset:Int): ArrayList<Session> {
         val sessions = ArrayList<Session>()

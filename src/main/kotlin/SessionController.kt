@@ -3,10 +3,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class SessionController(daoInterface: SessionDAOInterface): ControllerInterface<Session> {
+class SessionController(private val dao: DAOInterface<Session>): ControllerInterface<Session> {
 
     companion object: KLogging()
-    private val dao: SessionDAOInterface = daoInterface
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1

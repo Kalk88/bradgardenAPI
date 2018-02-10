@@ -5,7 +5,7 @@ import org.apache.commons.dbutils.DbUtils
 /**
  * Created by kalk on 6/20/17.
  */
-class MemberDAO(private val db: Database): MemberDAOInterface {
+class MemberDAO(private val db: Database): DAOInterface<Member> {
 
     override fun add(member: Member): Int {
         var id: Int

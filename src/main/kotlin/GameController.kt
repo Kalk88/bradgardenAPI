@@ -3,9 +3,8 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class GameController(dao: GameDAOInterface): ControllerInterface<Game> {
+class GameController(private val dao: DAOInterface<Game>): ControllerInterface<Game> {
     companion object: KLogging()
-    private val dao: GameDAOInterface = dao
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
