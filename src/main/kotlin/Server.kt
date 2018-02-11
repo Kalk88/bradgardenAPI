@@ -28,35 +28,33 @@ class APIException(message: String) : Exception(message)
 class Server {
     companion object: KLogging()
 
-    fun start() {
+    fun start(conf:Config) {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val auth = Authorization()
-        val repository = Repository(DBConnection.instance)
-        val properties = Properties()
-        properties.load(FileInputStream("src/main/resources/server.properties"))
-        ipAddress(properties.getProperty("SERVERIP"))
-        port(properties.getProperty("SERVERPORT").toInt())
-
+        val db = DBConnection(conf.dbUrl, conf.dbUser, conf.dbPass)
+        val auth = Authorization(db)
+        val repository = Repository(db)
+        ipAddress(conf.ip)
+        port(conf.port)
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
         before ("/api/*") {req, res ->
-          if(req.requestMethod() != "GET")
+            if(req.requestMethod() != "GET")
             {
-              try {
-                  val params = req.headers("Authorization").split(":")
-                  val user = params[0]
-                  val key = params[1]
-                  logRequest(req.ip(), req.requestMethod(), user)
-                  if(!auth.authorize(key, req.body(), user)) {
-                      logger.error {"$user, $key and ${req.body()} invalid" }
-                      throw APIException("Unauthorized request")
-                  }
-              } catch (e: Exception) {
-                  logger.error { e.printStackTrace() }
-                  throw APIException("Unauthorized request") }
+                try {
+                    val params = req.headers("Authorization").split(":")
+                    val user = params[0]
+                    val key = params[1]
+                    logRequest(req.ip(), req.requestMethod(), user)
+                    if(!auth.authorize(key, req.body(), user)) {
+                        logger.error {"$user, $key and ${req.body()} invalid" }
+                        throw APIException("Unauthorized request")
+                    }
+                } catch (e: Exception) {
+                    logger.error { e.printStackTrace() }
+                    throw APIException("Unauthorized request") }
             }
         }
 
@@ -86,8 +84,14 @@ class Server {
         }
 
         put(MEMBER_ID) { req, res ->
-            repository.update(req.params(":id"), req.body())
-            buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+            val member = mapper.readValue<Member>(req.body())
+            val id = req.params(":id")
+            if(id.toInt() != member.id) {
+                buildResponse(statusCode=HTTP_BAD_REQUEST,body="id of member and uri does not match",response = res)
+            } else {
+                repository.update(req.params(":id"), member)
+                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
+            }
             res.body()
         }
 

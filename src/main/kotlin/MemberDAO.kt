@@ -116,7 +116,11 @@ class MemberDAO(private val db: Database): DAOInterface<Member> {
         val members = ArrayList<Member>()
         val con = db.open()
         try {
-            val stmt = con.prepareStatement("select * from member")
+            val stmt = con.prepareStatement("""select m.first, m.last, w.wins, l.losses, t.timesTraitor, m.id from
+                                                (select count(member) as wins from winner) as w,
+                                                (select count(member) as losses from loser) as l,
+                                                (select count(member) as timesTraitor from traitor) as t,
+                                                (select first_name as first, last_name as last , member_id as id from member) as m""")
             val rs = stmt.executeQuery()
             while(rs.next()) {
                 val wins = rs.getInt(3)

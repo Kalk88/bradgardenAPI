@@ -50,7 +50,12 @@ class SessionController(private val dao: DAOInterface<Session>): ControllerInter
     }
 
     override fun getAll(): ArrayList<Session> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            return dao.getAll()
+        } catch (e: Exception) {
+            logger.error { e.message }
+            throw APIException("Could not retrieve all sessions")
+        }
     }
 
 

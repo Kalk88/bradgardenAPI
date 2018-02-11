@@ -16,27 +16,35 @@ class Repository(val db: Database) {
 
     fun add(member:Member): String {
         val id = memberController.add(member)
+        members.add(member)
         return id
     }
 
-    fun update(id: String, data: String): String {
-        TODO()
+    fun update(id: String, member: Member): String {
+        memberController.update(id, member)
+        val index = members.indexOfFirst { it.id == id.toInt() }
+        members[index] = member
+        return id
     }
 
     fun getMemberFromParams(params: HashMap<String, String>): String {
-        TODO()
+        val members = memberController.getFromParams(params)
+        return members
     }
 
     fun getMemberByID(id: String): String {
-        TODO()
+        val member = members.find { it.id == id.toInt() }
+        return mapper.writeValueAsString(member)
     }
 
     fun removeMemberWithID(id: String) {
-        TODO()
+        memberController.removeWithID(id)
+        members.removeIf { it.id == id.toInt() }
     }
 
     fun add(game:Game): String {
-        TODO()
+        val id = gameController.add(game)
+        return id
     }
 
     fun update(id: String, game: Game): String {

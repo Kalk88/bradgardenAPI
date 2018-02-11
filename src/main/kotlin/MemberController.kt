@@ -57,7 +57,12 @@ class MemberController(private val dao: DAOInterface<Member>) : ControllerInterf
     }
 
     override fun getAll(): ArrayList<Member> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            return dao.getAll()
+        } catch (e: Exception) {
+            logger.error { e.message }
+            throw APIException("Could not get all members")
+        }
     }
 
     override fun removeWithID(id: String) {

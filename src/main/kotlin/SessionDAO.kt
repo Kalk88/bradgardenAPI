@@ -54,7 +54,6 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
             val rs = stmt.executeQuery()
             while (rs.next()) {
               //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
-                TODO()
             }
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -91,7 +90,20 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
     }
 
     override fun getAll(): ArrayList<Session> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val sessions = ArrayList<Session>()
+        val con = db.open()
+        try {
+            val stmt = con.prepareStatement("select * from game_session")
+            val rs = stmt.executeQuery()
+            while (rs.next()) {
+                //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+            }
+        } catch (e: Exception) {
+            throw APIException("${e.message}")
+        } finally {
+            DbUtils.close(con)
+        }
+        return sessions
     }
 
     override fun delete(id: Int): Boolean {

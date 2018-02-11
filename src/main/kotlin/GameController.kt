@@ -57,7 +57,13 @@ class GameController(private val dao: DAOInterface<Game>): ControllerInterface<G
     }
 
     override fun getAll(): ArrayList<Game> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            return dao.getAll()
+        } catch (e:Exception) {
+            logger.error { e.message }
+            throw APIException("Could not get all games")
+        }
+
     }
     override fun removeWithID(id: String) {
         try {

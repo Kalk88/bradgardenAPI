@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Created by kalk on 7/2/17.
  */
-class Authorization {
+class Authorization(db: Database) {
     companion object : KLogging()
      private val HMAC_SHA1 = "HmacSHA1"
   private  val kg = KeyGenerator.getInstance(HMAC_SHA1)
@@ -16,7 +16,7 @@ class Authorization {
   private  val users = HashMap<String, String>()
     init {
         mac.init(kg.generateKey())
-        val connection = DBConnection.instance.open()
+        val connection = db.open()
         try {
             val stmt = connection.prepareStatement("select name, secret from api_user")
             val rs = stmt.executeQuery()

@@ -72,12 +72,26 @@ class GameDAO(private val db: Database): DAOInterface<Game>  {
     }
 
     override fun getDetailed(id: Int): Game {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         return Game(-1, "dummy",0,false,false)
     }
 
     override fun getAll(): ArrayList<Game> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val games = ArrayList<Game>()
+        val con = db.open()
+        try{
+            val stmt =  con.prepareStatement("select * from game")
+            stmt.executeQuery()
+            val rs = stmt.resultSet
+            while(rs.next()){
+                games.add(Game(id = rs.getInt("game_id"), name = rs.getString("game_name"),maxNumOfPlayers = rs.getInt("max_Players"), traitor = rs.getBoolean("traitor"), coop = rs.getBoolean("co_op")))
+            }
+            con.close()
+        }catch (e:Exception) {
+            logger.error("Error GET ${e.message}")
+        } finally {
+            DbUtils.close(con)
+        }
+        return games
     }
 
     override fun delete(id: Int): Boolean{
