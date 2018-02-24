@@ -22,19 +22,19 @@ class Repository(val db: Database) {
 
     fun update(id: String, member: Member): String {
         memberController.update(id, member)
-        val index = members.indexOfFirst { it.id == id.toInt() }
+        val index = members.indexOfFirst{it.id == id.toInt()}
         members[index] = member
         return id
     }
 
     fun getMemberFromParams(params: HashMap<String, String>): String {
-        val members = memberController.getFromParams(params)
-        return members
+        if(params.isEmpty())
+            return mapper.writeValueAsString(members)
+        return ""
     }
 
     fun getMemberByID(id: String): String {
-        val member = members.find { it.id == id.toInt() }
-        return mapper.writeValueAsString(member)
+        return mapper.writeValueAsString(members.find{ it.id == id.toInt()})
     }
 
     fun removeMemberWithID(id: String) {
@@ -44,23 +44,30 @@ class Repository(val db: Database) {
 
     fun add(game:Game): String {
         val id = gameController.add(game)
+        games.add(game)
         return id
     }
 
     fun update(id: String, game: Game): String {
-        TODO()
+        gameController.update(id, game)
+        val index = games.indexOfFirst{it.id == id.toInt()}
+        games[index] = game
+        return id
     }
 
     fun getGameFromParams(params: HashMap<String, String>): String {
-        TODO()
+        if(params.isEmpty())
+            return mapper.writeValueAsString(games)
+        return ""
     }
 
     fun getGameByID(id: String): String {
-        TODO()
+        return mapper.writeValueAsString(games.find{it.id == id.toInt()})
     }
 
     fun removeGameByID(id: String) {
-        TODO()
+       gameController.removeWithID(id)
+        games.removeIf{it.id == id.toInt()}
     }
 
     fun add(data: Session): String {
