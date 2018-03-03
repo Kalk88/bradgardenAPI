@@ -18,7 +18,7 @@ class Repository(val db: Database) {
         val id = memberController.add(member)
 
         members.add(Member(id.toInt(),member.firstName, member.lastName, member.wins,
-                           member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
+                member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
         return id
     }
 
@@ -68,14 +68,42 @@ class Repository(val db: Database) {
     }
 
     fun removeGameByID(id: String) {
-       gameController.removeWithID(id)
+        gameController.removeWithID(id)
         games.removeIf{it.id == id.toInt()}
     }
 
     fun add(session: Session): String {
         val id = sessionController.add(session)
         sessions.add(Session(id.toInt(), session.date, session.gameID, session.winners, session.losers, session.traitors))
-        //TODO update members, games, etc. +1
+
+        session.winners.forEach { winner ->
+            members.map {
+                if(winner == it.id) {
+                    it.wins++
+                    it.gamesPlayed++
+                    it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                }
+            }
+        }
+
+        session.losers.forEach { loser ->
+            members.map {
+                if(loser == it.id) {
+                    it.losses++
+                    it.gamesPlayed++
+                    it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                }
+            }
+        }
+        //games played for traitors will be update in winner or loser update.
+        session.traitors.forEach { traitor ->
+            members.map {
+                if(traitor == it.id) {
+                    it.timesTraitor++
+                }
+            }
+        }
+
         return id
     }
 
@@ -92,7 +120,37 @@ class Repository(val db: Database) {
     fun removeSessionWithID(id: String) {
         sessionController.removeWithID(id)
         val session = sessions.find { it.id == id.toInt() }
-        //TODO, remove winners etc from in memory lists -1
+        if(session != null) {
+            session.winners.forEach { winner ->
+                members.map {
+                    if(winner == it.id) {
+                        it.wins--
+                        it.gamesPlayed--
+                        it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                    }
+                }
+            }
+
+            session.losers.forEach { loser ->
+                members.map {
+                    if(loser == it.id) {
+                        it.losses--
+                        it.gamesPlayed--
+                        it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                    }
+                }
+            }
+            //games played for traitors will be update in winner or loser update.
+            session.traitors.forEach { traitor ->
+                members.map {
+                    if(traitor == it.id) {
+                        it.timesTraitor--
+                    }
+                }
+            }
+        }
         sessions.removeIf { it.id == id.toInt() }
     }
+
+
 }
