@@ -27,13 +27,13 @@ class APIException(message: String) : Exception(message)
 class Server {
     companion object: KLogging()
 
-    fun start(conf:Config) {
+    fun start() {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = DBConnection(conf.dbUrl, conf.dbUser, conf.dbPass)
+        val db = DBConnection(System.getenv("DBURL"), System.getenv("DBUSER"), System.getenv("DBPASSWORD"))
         val auth = Authorization(db)
         val repository = Repository(db)
-        val p = if(System.getenv("PORT").isNullOrEmpty()) conf.port else System.getenv("PORT").toInt()
+        val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         port(p)
 
 
