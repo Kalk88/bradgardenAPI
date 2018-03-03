@@ -16,7 +16,8 @@ class Repository(val db: Database) {
 
     fun add(member:Member): String {
         val id = memberController.add(member)
-        members.add(member)
+        members.add(Member(id.toInt(),member.firstName, member.lastName, member.wins,
+                           member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
         return id
     }
 
@@ -42,9 +43,9 @@ class Repository(val db: Database) {
         members.removeIf { it.id == id.toInt() }
     }
 
-    fun add(game:Game): String {
+    fun add(game: Game): String {
         val id = gameController.add(game)
-        games.add(game)
+        games.add(Game(id.toInt(), game.name, game.maxNumOfPlayers, game.traitor, game.coop))
         return id
     }
 
@@ -70,19 +71,27 @@ class Repository(val db: Database) {
         games.removeIf{it.id == id.toInt()}
     }
 
-    fun add(data: Session): String {
-        TODO()
+    fun add(session: Session): String {
+        val id = sessionController.add(session)
+        sessions.add(Session(id.toInt(), session.date, session.gameID, session.winners, session.losers, session.traitors))
+        //TODO update members, games, etc. +1
+        return id
     }
 
     fun getSessionFromParams(params: HashMap<String, String>): String {
-        TODO()
+        if(params.isEmpty())
+            return mapper.writeValueAsString(sessions)
+        return ""
     }
 
     fun getSessionByID(id: String): String {
-        TODO()
+        return mapper.writeValueAsString(sessions.find{it.id == id.toInt()})
     }
 
     fun removeSessionWithID(id: String) {
-        TODO()
+        sessionController.removeWithID(id)
+        val session = sessions.find { it.id == id.toInt() }
+        //TODO, remove winners etc from in memory lists -1
+        sessions.removeIf { it.id == id.toInt() }
     }
 }

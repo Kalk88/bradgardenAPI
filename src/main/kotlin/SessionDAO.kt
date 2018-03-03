@@ -142,5 +142,3 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
         return list
     }
 }
-
-data class Session(val id: Int = -1, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)

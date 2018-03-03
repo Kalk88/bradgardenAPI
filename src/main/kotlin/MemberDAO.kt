@@ -139,16 +139,3 @@ class MemberDAO(private val db: Database): DAOInterface<Member> {
     }
 
 }
-
-
-data class Member(val id: Int = -1, val firstName: String, val lastName: String,
-                  val wins: Int, val winRatio: Double, val losses: Int,
-                  val timesTraitor: Int, val gamesPlayed: Int) {
-    init {
-        val numbers = Regex(".*\\d+.*")
-        require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
-        require(firstName.length > 1) {"$firstName is invalid, must be at least 2 characters."}
-        require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
-    }
-}
-
