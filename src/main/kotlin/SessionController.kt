@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
 class SessionController(private val dao: DAOInterface<Session>): ControllerInterface<Session> {
@@ -12,7 +11,6 @@ class SessionController(private val dao: DAOInterface<Session>): ControllerInter
 
     override fun add(session: Session): String {
         try {
-
             val id = dao.add(session)
             logger.info { "Added Session" }
             return id.toString()
