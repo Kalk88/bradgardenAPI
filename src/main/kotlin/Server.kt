@@ -40,7 +40,9 @@ class Server {
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
+
         before ("/api/*") {req, res ->
+            /* Till we figure this out
             if(req.requestMethod() != "GET")
             {
                 try {
@@ -56,6 +58,7 @@ class Server {
                     logger.error { e.printStackTrace() }
                     throw APIException("Unauthorized request") }
             }
+            */
         }
 
         get(ENDPOINTS) { req, res ->
@@ -82,18 +85,7 @@ class Server {
             buildResponse(body = member, response = res)
             res.body()
         }
-
-        put(MEMBER_ID) { req, res ->
-            val member = mapper.readValue<Member>(req.body())
-            val id = req.params(":id")
-            if(id.toInt() != member.id) {
-                buildResponse(statusCode=HTTP_BAD_REQUEST,body="id of member and uri does not match",response = res)
-            } else {
-                repository.update(req.params(":id"), member)
-                buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
-            }
-            res.body()
-        }
+        
 
         delete(MEMBER_ID) { req, res ->
             repository.removeMemberWithID(req.params(":id"))
