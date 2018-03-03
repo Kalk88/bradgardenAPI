@@ -39,4 +39,9 @@ data class Game(val id: Int = -1, val name: String, val maxNumOfPlayers: Int, va
  * Represents one completed playthrough of a game, if several games or rounds of games were played during meeting
  * each round is a separate session.
  */
-data class Session(val id: Int = -1, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
+data class Session(val id: Int = -1, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>){
+    init {
+       // val dateformat = Regex("""\s{4}-\s{2}-\s{2}T\s{2}:\s{2}:\s{2}\+\s{2}:\s{2}""")
+       // require(date.matches(dateformat)) {"Dateformat should conform to ISO 8601 standard e.g. 1997-07-16T19:20:30.45+01:00"}
+    }
+}

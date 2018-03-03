@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
-import java.io.FileInputStream
 import java.util.*
 
 /**
@@ -85,7 +84,6 @@ class Server {
             buildResponse(body = member, response = res)
             res.body()
         }
-        
 
         delete(MEMBER_ID) { req, res ->
             repository.removeMemberWithID(req.params(":id"))
