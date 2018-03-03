@@ -9,7 +9,7 @@ data class Config(val ip:String, val port:Int, val dbUrl:String, val dbUser:Stri
 
 fun main(args: Array<String>){
     server()
-// localserver()
+//localserver()
 }
 
 private fun server() {
