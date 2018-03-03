@@ -33,8 +33,10 @@ class Server {
         val db = DBConnection(conf.dbUrl, conf.dbUser, conf.dbPass)
         val auth = Authorization(db)
         val repository = Repository(db)
-        ipAddress(conf.ip)
-        port(conf.port)
+        val p = if(System.getenv("PORT").isNullOrEmpty()) conf.port else System.getenv("PORT").toInt()
+        port(p)
+
+
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
@@ -171,4 +173,5 @@ class Server {
     private fun logRequest(ip:String, method: String, user: String) {
         logger.info("""$method request by $user from $ip""")
     }
+
 }

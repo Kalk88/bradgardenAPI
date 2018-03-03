@@ -8,8 +8,8 @@ import java.util.*
 data class Config(val ip:String, val port:Int, val dbUrl:String, val dbUser:String, val dbPass:String)
 
 fun main(args: Array<String>){
-    // server()
-    localserver()
+    server()
+// localserver()
 }
 
 private fun server() {
