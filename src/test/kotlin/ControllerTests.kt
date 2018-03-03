@@ -3,10 +3,10 @@ import org.junit.*
 import org.junit.Assert.*
 
 class ControllerTests {
-
+    private val dateString = "1997-07-16T19:20:30.45+01:00";
     private fun dummyMember(id:Int, first:String = "Anthony", last:String = "Dankfano"): Member { return Member(id, first, last, 100, 1.0, 0, 0, 100) }
     private fun dummyGame (id:Int, name:String = "dummy"): Game { return Game(id, name, 100, true, true) }
-    private fun dummySession(id: Int): Session {return Session(id, "date", 1, listOf(1,2,3), listOf(3,2,1), listOf(1))}
+    private fun dummySession(id: Int): Session {return Session(id, dateString, 1, listOf(1,2,3), listOf(3,2,1), listOf(1))}
 
     @Test fun creates_a_memberController() {
         val mock = mock<DAOInterface<Member>>()
@@ -221,7 +221,7 @@ class ControllerTests {
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>()
         val sessionsAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""".trimMargin(), sessionsAsString)
+        assertEquals("""[{"id":1,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""".trimMargin(), sessionsAsString)
     }
 
 
@@ -232,7 +232,7 @@ class ControllerTests {
         val controller = SessionController(mock)
         val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
         val sessionsAsString = controller.getFromParams(params)
-        assertEquals("""[{"id":1,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""", sessionsAsString)
+        assertEquals("""[{"id":1,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""", sessionsAsString)
     }
 
     @Test fun should_return_session_from_ID() {
@@ -241,7 +241,7 @@ class ControllerTests {
         }
         val controller = SessionController(mock)
         val gameAsString = controller.getFromID("2")
-        assertEquals("""{"id":2,"date":"date","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}""", gameAsString)
+        assertEquals("""{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}""", gameAsString)
     }
 
     @Test  (expected = APIException::class)
