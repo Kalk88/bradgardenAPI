@@ -16,6 +16,7 @@ class Repository(val db: Database) {
 
     fun add(member:Member): String {
         val id = memberController.add(member)
+
         members.add(Member(id.toInt(),member.firstName, member.lastName, member.wins,
                            member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
         return id
