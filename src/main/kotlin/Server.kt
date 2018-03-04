@@ -59,6 +59,7 @@ class Server {
             }
             */
         }
+        
         get("/") { req, res ->
             "Hello"
         }
