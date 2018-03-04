@@ -14,9 +14,7 @@ class DBConnection (url: String,  private val user: String,  private val passwor
      */
     override fun open(): Connection {
         try {
-            val heroku:String? = System.getenv("JDBC_DATABASE_URL")
-            val connection = if(heroku != null) DriverManager.getConnection(heroku)
-                             else DriverManager.getConnection(dburl, user, password)
+            val connection = DriverManager.getConnection(dburl, user, password)
             return connection
         } catch (e: SQLException) {
             throw APIException("database connection error ${e.message} $dburl")

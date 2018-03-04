@@ -30,8 +30,8 @@ class Server {
     fun start() {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = DBConnection(System.getenv("DBURL"), System.getenv("DBUSER"), System.getenv("DBPASSWORD"))
-        val auth = Authorization(db)
+        val db = HerokuDb()
+      //  val auth = Authorization(db)
         val repository = Repository(db)
         val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         port(p)
