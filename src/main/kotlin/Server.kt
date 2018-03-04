@@ -59,6 +59,9 @@ class Server {
             }
             */
         }
+        get("/") { req, res ->
+            "Hello"
+        }
 
         get(ENDPOINTS) { req, res ->
             buildResponse(body=mapper.writeValueAsString(publicEndpoints), response = res)
