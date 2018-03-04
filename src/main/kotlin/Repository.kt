@@ -6,12 +6,12 @@ import mu.KLogging
 class Repository(val db: Database) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     companion object: KLogging()
-    val memberController = MemberController(MemberDAO(db))
-    val gameController = GameController(GameDAO(db))
-    val sessionController = SessionController(SessionDAO(db))
-    var members = memberController.getAll()
-    var games = gameController.getAll()
-    var sessions = sessionController.getAll()
+    private val memberController = MemberController(MemberDAO(db))
+    private val gameController = GameController(GameDAO(db))
+    private val sessionController = SessionController(SessionDAO(db))
+    private var members = memberController.getAll()
+    private var games = gameController.getAll()
+    private var sessions = sessionController.getAll()
 
 
     fun add(member:Member): String {
