@@ -36,8 +36,6 @@ class Server {
         val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         port(p)
 
-
-
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
