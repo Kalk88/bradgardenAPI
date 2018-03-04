@@ -3,16 +3,15 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class GameController(dao: GameDAOInterface): ControllerInterface {
+class GameController(private val dao: DAOInterface<Game>): ControllerInterface<Game> {
     companion object: KLogging()
-    private val dao: GameDAOInterface = dao
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(game: Game): String {
         try {
-            val game = mapper.readValue<AddGame>(data)
+
             val id = dao.add(game)
             logger.info {"Added game ${game.name}"}
             return id.toString()
@@ -22,9 +21,9 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
         }
     }
 
-    override fun update(id: String, data: String): String {
+    override fun update(id: String, game: Game): String {
         try {
-            val game = mapper.readValue<AddGame>(data)
+
             dao.update(id.toInt(), game)
             logger.info {"Update game ${game.name}"}
             return id //TODO what to return?
@@ -57,6 +56,15 @@ class GameController(dao: GameDAOInterface): ControllerInterface {
         }
     }
 
+    override fun getAll(): ArrayList<Game> {
+        try {
+            return dao.getAll()
+        } catch (e:Exception) {
+            logger.error { e.message }
+            throw APIException("Could not get all games")
+        }
+
+    }
     override fun removeWithID(id: String) {
         try {
             dao.delete(id.toInt())

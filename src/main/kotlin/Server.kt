@@ -1,9 +1,9 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 import spark.Response
 import spark.Spark.*
-import java.io.FileInputStream
 import java.util.*
 
 /**
@@ -26,39 +26,42 @@ class APIException(message: String) : Exception(message)
 
 class Server {
     companion object: KLogging()
-    fun start() {
 
+    fun start() {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val auth = Authorization()
-        val memberController = MemberController(MemberDAO())
-        val gameController = GameController(GameDAO())
-        val sessionController = SessionController(SessionDAO())
-        val properties = Properties()
-        properties.load(FileInputStream("src/main/resources/server.properties"))
-        ipAddress(properties.getProperty("SERVERIP"))
-        port(properties.getProperty("SERVERPORT").toInt())
-
+        val db = HerokuDb()
+      //  val auth = Authorization(db)
+        val repository = Repository(db)
+        val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
+        port(p)
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
         }
+
         before ("/api/*") {req, res ->
-          if(req.requestMethod() != "GET")
+            /* Till we figure this out
+            if(req.requestMethod() != "GET")
             {
-              try {
-                  val params = req.headers("Authorization").split(":")
-                  val user = params[0]
-                  val key = params[1]
-                  logRequest(req.ip(), req.requestMethod(), user)
-                  if(!auth.authorize(key, req.body(), user)) {
-                      logger.error {"$user, $key and ${req.body()} invalid" }
-                      throw APIException("Unauthorized request")
-                  }
-              } catch (e: Exception) {
-                  logger.error { e.printStackTrace() }
-                  throw APIException("Unauthorized request") }
+                try {
+                    val params = req.headers("Authorization").split(":")
+                    val user = params[0]
+                    val key = params[1]
+                    logRequest(req.ip(), req.requestMethod(), user)
+                    if(!auth.authorize(key, req.body(), user)) {
+                        logger.error {"$user, $key and ${req.body()} invalid" }
+                        throw APIException("Unauthorized request")
+                    }
+                } catch (e: Exception) {
+                    logger.error { e.printStackTrace() }
+                    throw APIException("Unauthorized request") }
             }
+            */
+        }
+        
+        get("/") { req, res ->
+            "Hello"
         }
 
         get(ENDPOINTS) { req, res ->
@@ -67,82 +70,80 @@ class Server {
         }
 
         post(MEMBERS) { req, res ->
-            val id = memberController.add(req.body())
+            val member = mapper.readValue<Member>(req.body())
+            val id = repository.add(member)
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
 
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val members = memberController.getFromParams(params)
+            val members = repository.getMemberFromParams(params)
             buildResponse(statusCode = HTTP_OK, body = members, response = res)
             res.body()
         }
 
         get(MEMBER_ID) { req, res ->
-            val member = memberController.getFromID(req.params(":id"))
+            val member = repository.getMemberByID(req.params(":id"))
             buildResponse(body = member, response = res)
             res.body()
         }
 
-        put(MEMBER_ID) { req, res ->
-            memberController.update(req.params(":id"), req.body())
-            buildResponse(statusCode=HTTP_NO_CONTENT,body="",response = res)
-            res.body()
-        }
-
         delete(MEMBER_ID) { req, res ->
-            memberController.removeWithID(req.params(":id"))
+            repository.removeMemberWithID(req.params(":id"))
             buildResponse(statusCode = HTTP_NO_CONTENT, type="", response = res)
             res.body()
         }
 
         post(GAMES) { req, res ->
-            val id = gameController.add(req.body())
+            val game = mapper.readValue<Game>(req.body())
+            val id = repository.add(game)
             buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
 
         get(GAMES) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val games = gameController.getFromParams(params)
+            val games = repository.getGameFromParams(params)
             buildResponse(statusCode = HTTP_OK, body = games, response = res)
             res.body()
         }
 
         put(GAME_ID) { req, res ->
-            gameController.update(req.params(":id"), req.body())
+            val game = mapper.readValue<Game>(req.body())
+            repository.update(req.params(":id"), game)
             buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
             res.body()
         }
 
         delete(GAME_ID) { req, res ->
-            gameController.removeWithID(req.params(":id"))
+            repository.removeGameByID(req.params(":id"))
             buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
             res.body()
         }
 
         post(SESSIONS) { req, res ->
-            val id = sessionController.add(req.body())
+            val session = mapper.readValue<Session>(req.body())
+            val id = repository.add(session)
             buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
             res.body()
         }
 
         get(SESSIONS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val sessions = sessionController.getFromParams(params)
+            val sessions = repository.getSessionFromParams(params)
             buildResponse(statusCode = HTTP_OK, body = sessions, response = res)
             res.body()
         }
 
         get(SESSION_ID) { req, res ->
-            val session = sessionController.getFromID(req.params(":id"))
+            val session = repository.getSessionByID(req.params(":id"))
             buildResponse(body=session, response = res)
             res.body()
         }
 
         delete(SESSION_ID) { req, res ->
-            sessionController.removeWithID(":id")
+            repository.removeSessionWithID(":id")
             buildResponse(statusCode=HTTP_NO_CONTENT, type ="", response = res)
             res.body()
         }
@@ -174,4 +175,5 @@ class Server {
     private fun logRequest(ip:String, method: String, user: String) {
         logger.info("""$method request by $user from $ip""")
     }
+
 }

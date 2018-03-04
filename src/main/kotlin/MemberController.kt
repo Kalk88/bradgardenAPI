@@ -3,16 +3,16 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class MemberController(dao: MemberDAOInterface) : ControllerInterface {
+class MemberController(private val dao: DAOInterface<Member>) : ControllerInterface<Member> {
+
     companion object: KLogging()
-    private val dao: MemberDAOInterface = dao
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(member: Member): String {
         try {
-            val member = mapper.readValue<AddMember>(data)
+
             val id = dao.add(member)
             logger.info { "Added member ${member.firstName} ${member.lastName}" }
             return id.toString()
@@ -22,9 +22,8 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
         }
     }
 
-    override fun update(id: String, data: String): String {
+    override fun update(id: String, member: Member): String {
         try {
-            val member = mapper.readValue<AddMember>(data)
             dao.update(id.toInt(), member)
             logger.info { "Updated member ${id}" }
             return id
@@ -35,16 +34,16 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
     }
 
     override fun getFromParams(params: HashMap<String, String>): String {
-      try {
-          val size = params["pageSize"]?.toInt() ?: -1
-          val start = params["pageStart"]?.toInt() ?: -1
-          val limit = paramOrDefault(size, DEFAULT_LIMIT)
-          val offset = paramOrDefault(start, DEFAULT_OFFSET)
-          return mapper.writeValueAsString(dao.get(limit, offset-1))
-      } catch (e: Exception) {
-          logger.error { e.message }
-          throw APIException("Could not get members ${e.message}")
-      }
+        try {
+            val size = params["pageSize"]?.toInt() ?: -1
+            val start = params["pageStart"]?.toInt() ?: -1
+            val limit = paramOrDefault(size, DEFAULT_LIMIT)
+            val offset = paramOrDefault(start, DEFAULT_OFFSET)
+            return mapper.writeValueAsString(dao.get(limit, offset-1))
+        } catch (e: Exception) {
+            logger.error { e.message }
+            throw APIException("Could not get members ${e.message}")
+        }
     }
 
     override fun getFromID(id: String): String {
@@ -54,6 +53,15 @@ class MemberController(dao: MemberDAOInterface) : ControllerInterface {
         } catch (e: Exception) {
             logger.error { e.message }
             throw APIException("Could not get member")
+        }
+    }
+
+    override fun getAll(): ArrayList<Member> {
+        try {
+            return dao.getAll()
+        } catch (e: Exception) {
+            logger.error { e.message }
+            throw APIException("Could not get all members")
         }
     }
 

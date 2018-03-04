@@ -3,17 +3,18 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.ArrayList
+import kotlin.collections.ArrayList
 
 /**
  * Created by kalk on 6/20/17.
  */
-class SessionDAO: SessionDAOInterface {
+class SessionDAO(private val db: Database): DAOInterface<Session> {
+
     private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
-    override fun add(session: AddSession): Int {
+    override fun add(session: Session): Int {
         val sessionID: Int
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             val insertSession  = "insert into game_session (game, session_date) values (?, ?) returning session_id"
             val winnerStatement = "insert into winner values (?, ?)"
@@ -38,16 +39,21 @@ class SessionDAO: SessionDAOInterface {
         return sessionID
     }
 
-    override fun get(limit:Int, offset:Int): ArrayList<LightSession> {
-        val sessions = ArrayList<LightSession>()
-        val con = DBConnection.instance.open()
+    override fun update(id: Int, data: Session): Boolean {
+        return false //No to be used
+    }
+
+
+    override fun get(limit:Int, offset:Int): ArrayList<Session> {
+        val sessions = ArrayList<Session>()
+        val con = db.open()
         try {
             val stmt = con.prepareStatement("select * from game_session limit ? offset ?")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
             val rs = stmt.executeQuery()
             while (rs.next()) {
-                sessions.add(LightSession(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+              //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
             }
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -63,7 +69,7 @@ class SessionDAO: SessionDAOInterface {
         val getLosers =   "select member from loser where game_session = ?"
         val getTraitors = "select member from traitor where game_session = ?"
         var session: PreparedStatement
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             session = con.prepareStatement(getSession)
             session.setInt(1, id)
@@ -83,8 +89,25 @@ class SessionDAO: SessionDAOInterface {
         }
     }
 
+    override fun getAll(): ArrayList<Session> {
+        val sessions = ArrayList<Session>()
+        val con = db.open()
+        try {
+            val stmt = con.prepareStatement("select * from game_session")
+            val rs = stmt.executeQuery()
+            while (rs.next()) {
+                //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+            }
+        } catch (e: Exception) {
+            throw APIException("${e.message}")
+        } finally {
+            DbUtils.close(con)
+        }
+        return sessions
+    }
+
     override fun delete(id: Int): Boolean {
-        val con = DBConnection.instance.open()
+        val con = db.open()
         try {
             val stmt = con.prepareStatement("delete from game_session where session_id = ?")
             stmt.setInt(1, id)
@@ -119,6 +142,3 @@ class SessionDAO: SessionDAOInterface {
         return list
     }
 }
-data class LightSession(val id: Int, val date: String, val gameID: Int)
-data class AddSession(val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)
-data class Session(val id: Int, val date: String, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>)

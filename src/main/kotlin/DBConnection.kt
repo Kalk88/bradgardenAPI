@@ -1,40 +1,22 @@
-import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
-import java.util.Properties
 
 /**
  * Singelton, gives access to the database.
  * Created by kalk on 6/22/17.
  */
 
-class DBConnection private constructor() {
-    private val dburl : String
-    private val user : String
-    private val password : String
-    init {
-        val properties = Properties()
-        properties.load(FileInputStream("src/main/resources/server.properties"))
-        dburl = "jdbc:postgresql://${properties.getProperty("DBURL")}"
-        user = properties.getProperty("DBUSER")
-        password = properties.getProperty("DBPASSWORD")
-    }
-    private object Holder { val INSTANCE = DBConnection()}
-
-    companion object {
-        val instance: DBConnection by lazy { Holder.INSTANCE }
-    }
-
+class DBConnection (url: String,  private val user: String,  private val password: String): Database {
+    private val dburl = "jdbc:postgresql://$url"
     /**
      * @Return a connection to the database.
      */
-    fun open(): Connection {
+    override fun open(): Connection {
         try {
             val connection = DriverManager.getConnection(dburl, user, password)
             return connection
         } catch (e: SQLException) {
-
             throw APIException("database connection error ${e.message} $dburl")
         }
     }

@@ -1,18 +1,16 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class SessionController(daoInterface: SessionDAOInterface): ControllerInterface {
+class SessionController(private val dao: DAOInterface<Session>): ControllerInterface<Session> {
+
     companion object: KLogging()
-    private val dao: SessionDAOInterface = daoInterface
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     private val DEFAULT_LIMIT = 100
     private val DEFAULT_OFFSET = 1
 
-    override fun add(data: String): String {
+    override fun add(session: Session): String {
         try {
-            val session = mapper.readValue<AddSession>(data)
             val id = dao.add(session)
             logger.info { "Added Session" }
             return id.toString()
@@ -22,8 +20,8 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
         }
     }
 
-    override fun update(id: String, data: String): String {
-            throw APIException("Cannot update a session. ARE U TRYIN TO CHEAT?")
+    override fun update(id: String, data: Session): String {
+        throw APIException("Cannot update a session. ARE U TRYIN TO CHEAT?")
     }
 
     override fun getFromParams(params: HashMap<String, String>): String {
@@ -48,6 +46,16 @@ class SessionController(daoInterface: SessionDAOInterface): ControllerInterface 
             throw APIException("Could not retrieve session")
         }
     }
+
+    override fun getAll(): ArrayList<Session> {
+        try {
+            return dao.getAll()
+        } catch (e: Exception) {
+            logger.error { e.message }
+            throw APIException("Could not retrieve all sessions")
+        }
+    }
+
 
     override fun removeWithID(id: String) {
         try {
