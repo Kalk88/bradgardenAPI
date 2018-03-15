@@ -1,31 +1,34 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
 
-class Repository(val db: Database) {
+class Repository(private val memberDao: MemberDAO,
+                 private val gameDao: GameDAO,
+                 private val sessionDao: SessionDAO) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
     companion object: KLogging()
-    private val memberController = MemberController(MemberDAO(db))
-    private val gameController = GameController(GameDAO(db))
-    private val sessionController = SessionController(SessionDAO(db))
-    private var members = memberController.getAll()
-    private var games = gameController.getAll()
-    private var sessions = sessionController.getAll()
+
+    private var members = memberDao.getAll()
+    private var games = gameDao.getAll()
+    private var sessions = sessionDao.getAll()
 
 
     fun add(member:Member): String {
-        val id = memberController.add(member)
-
-        members.add(Member(id.toInt(),member.firstName, member.lastName, member.wins,
+        val id = memberDao.add(member)
+        members.add(Member(id,member.firstName, member.lastName, member.wins,
                 member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
-        return id
+        return id.toString()
     }
 
     fun update(id: String, member: Member): String {
-        memberController.update(id, member)
-        val index = members.indexOfFirst{it.id == id.toInt()}
-        members[index] = member
+        try {
+            memberDao.update(id.toInt(), member)
+            val index = members.indexOfFirst{it.id == id.toInt()}
+            members[index] = member
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException ("Invalid id")
+        }
         return id
     }
 
@@ -36,24 +39,40 @@ class Repository(val db: Database) {
     }
 
     fun getMemberByID(id: String): String {
-        return mapper.writeValueAsString(members.find{ it.id == id.toInt()})
+        try {
+            val memberid = id.toInt()
+            return mapper.writeValueAsString(members.find{ it.id == memberid })
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invald id")
+        }
     }
 
     fun removeMemberWithID(id: String) {
-        memberController.removeWithID(id)
-        members.removeIf { it.id == id.toInt() }
+        try {
+            memberDao.delete(id.toInt())
+            members.removeIf { it.id == id.toInt() }
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invalid id")
+        }
     }
 
     fun add(game: Game): String {
-        val id = gameController.add(game)
-        games.add(Game(id.toInt(), game.name, game.maxNumOfPlayers, game.traitor, game.coop))
-        return id
+        val id = gameDao.add(game)
+        games.add(Game(id, game.name, game.maxNumOfPlayers, game.traitor, game.coop))
+        return id.toString()
     }
 
     fun update(id: String, game: Game): String {
-        gameController.update(id, game)
-        val index = games.indexOfFirst{it.id == id.toInt()}
-        games[index] = game
+        try {
+            gameDao.update(id.toInt(), game)
+            val index = games.indexOfFirst{ it.id == id.toInt() }
+            games[index] = game
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invalid id")
+        }
         return id
     }
 
@@ -64,26 +83,38 @@ class Repository(val db: Database) {
     }
 
     fun getGameByID(id: String): String {
-        return mapper.writeValueAsString(games.find{it.id == id.toInt()})
+        try {
+            val gameId = id.toInt()
+            return mapper.writeValueAsString(games.find{ it.id == gameId })
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invalid id")
+        }
+
     }
 
     fun removeGameByID(id: String) {
-        gameController.removeWithID(id)
-        games.removeIf{it.id == id.toInt()}
+        try {
+            gameDao.delete(id.toInt())
+            games.removeIf{it.id == id.toInt()}
+        } catch (e: NumberFormatException) {
+        logger.error { e }
+        throw APIException("Invalid id")
+    }
+
     }
 
     fun add(session: Session): String {
-        val id = sessionController.add(session)
-        sessions.add(Session(id.toInt(), session.date, session.gameID, session.winners, session.losers, session.traitors))
+        val id = sessionDao.add(session)
+        sessions.add(Session(id, session.date, session.gameID, session.winners, session.losers, session.traitors))
 
         session.winners.forEach { winner ->
-            members.map {
-                if(winner == it.id) {
-                    it.wins++
-                    it.gamesPlayed++
-                    it.winRatio = it.wins/(it.gamesPlayed *1.0)
-                }
-            }
+            members.filter{ it.id == winner }
+                    .map {
+                        it.wins++
+                        it.gamesPlayed++
+                        it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                    }
         }
 
         session.losers.forEach { loser ->
@@ -104,7 +135,7 @@ class Repository(val db: Database) {
             }
         }
 
-        return id
+        return id.toString()
     }
 
     fun getSessionFromParams(params: HashMap<String, String>): String {
@@ -114,42 +145,56 @@ class Repository(val db: Database) {
     }
 
     fun getSessionByID(id: String): String {
-        return mapper.writeValueAsString(sessions.find{it.id == id.toInt()})
+        try {
+            val sessionId = id.toInt()
+            return mapper.writeValueAsString(sessions.find{ it.id == sessionId })
+        } catch (e:NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invalid id")
+        }
+
     }
 
     fun removeSessionWithID(id: String) {
-        sessionController.removeWithID(id)
-        val session = sessions.find { it.id == id.toInt() }
-        if(session != null) {
-            session.winners.forEach { winner ->
-                members.map {
-                    if(winner == it.id) {
-                        it.wins--
-                        it.gamesPlayed--
-                        it.winRatio = it.wins/(it.gamesPlayed *1.0)
+        try {
+            val sessionId = id.toInt()
+            sessionDao.delete(sessionId)
+            val session = sessions.find { it.id == sessionId }
+            if(session != null) {
+                session.winners.forEach { winner ->
+                    members.map {
+                        if(winner == it.id) {
+                            it.wins--
+                            it.gamesPlayed--
+                            it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                        }
                     }
                 }
-            }
 
-            session.losers.forEach { loser ->
-                members.map {
-                    if(loser == it.id) {
-                        it.losses--
-                        it.gamesPlayed--
-                        it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                session.losers.forEach { loser ->
+                    members.map {
+                        if(loser == it.id) {
+                            it.losses--
+                            it.gamesPlayed--
+                            it.winRatio = it.wins/(it.gamesPlayed *1.0)
+                        }
+                    }
+                }
+                //games played for traitors will be update in winner or loser update.
+                session.traitors.forEach { traitor ->
+                    members.map {
+                        if(traitor == it.id) {
+                            it.timesTraitor--
+                        }
                     }
                 }
             }
-            //games played for traitors will be update in winner or loser update.
-            session.traitors.forEach { traitor ->
-                members.map {
-                    if(traitor == it.id) {
-                        it.timesTraitor--
-                    }
-                }
-            }
+            sessions.removeIf { it.id == sessionId }
+        } catch (e: NumberFormatException) {
+            logger.error { e }
+            throw APIException("Invalid id")
         }
-        sessions.removeIf { it.id == id.toInt() }
+
     }
 
 

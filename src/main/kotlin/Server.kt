@@ -32,7 +32,7 @@ class Server {
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val db = HerokuDb()
       //  val auth = Authorization(db)
-        val repository = Repository(db)
+        val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         port(p)
 
