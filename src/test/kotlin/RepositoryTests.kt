@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockito_kotlin.*
 import org.junit.*
 import org.junit.Assert.*
@@ -219,25 +220,27 @@ class RepositoryTests {
     }
 
 
-    @Ignore //TODO
     @Test fun should_return_a_list_of_sessions_when_queryparam_are_zero() {
+        val toComp = arrayListOf (dummySession(1), dummySession(2))
         mockSession = mock {
-            on {getAll()} doReturn arrayListOf (dummySession(1), dummySession(2))
+            on {getAll()} doReturn toComp
         }
         val repository = Repository(mockMember, mockGame, mockSession)
-        val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
+        val params = hashMapOf("pageSize" to "0", "pageStart" to "0")
         val sessionsAsString = repository.getSessionFromParams(params)
-        assertEquals("""[{"id":1,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""", sessionsAsString)
+        assertEquals(jacksonObjectMapper().writeValueAsString(toComp), sessionsAsString)
     }
 
     @Test fun should_return_session_from_ID() {
+        val toComp =  dummySession(2)
         mockSession = mock {
-            on {getAll()} doReturn arrayListOf (dummySession(1), dummySession(2))
-            on {getDetailed(2)} doReturn dummySession(2)
+            on {getAll()} doReturn arrayListOf (dummySession(1), toComp)
+            on {getDetailed(2)} doReturn toComp
         }
         val repository = Repository(mockMember, mockGame, mockSession)
         val gameAsString = repository.getSessionByID("2")
-        assertEquals("""{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}""", gameAsString)
+
+        assertEquals(jacksonObjectMapper().writeValueAsString(toComp), gameAsString)
     }
 
     @Test  (expected = APIException::class)

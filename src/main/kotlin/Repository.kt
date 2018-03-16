@@ -15,8 +15,8 @@ class Repository(private val memberDao: MemberDAO,
 
     fun add(member:Member): String {
         val id = memberDao.add(member)
-        members.add(Member(id,member.firstName, member.lastName, member.wins,
-                member.winRatio, member.losses, member.timesTraitor, member.gamesPlayed))
+        member.id = id
+        members.add(member)
         return id.toString()
     }
 
@@ -60,12 +60,15 @@ class Repository(private val memberDao: MemberDAO,
 
     fun add(game: Game): String {
         val id = gameDao.add(game)
-        games.add(Game(id, game.name, game.maxNumOfPlayers, game.traitor, game.coop))
+        game.id = id
+        games.add(game)
         return id.toString()
     }
 
     fun update(id: String, game: Game): String {
         try {
+            if (id.toInt() != game.id )
+                throw APIException("Invalid id")
             gameDao.update(id.toInt(), game)
             val index = games.indexOfFirst{ it.id == id.toInt() }
             games[index] = game
@@ -106,7 +109,8 @@ class Repository(private val memberDao: MemberDAO,
 
     fun add(session: Session): String {
         val id = sessionDao.add(session)
-        sessions.add(Session(id, session.date, session.gameID, session.winners, session.losers, session.traitors))
+        session.id = id
+        sessions.add(session)
 
         session.winners.forEach { winner ->
             members.filter{ it.id == winner }
@@ -141,7 +145,17 @@ class Repository(private val memberDao: MemberDAO,
     fun getSessionFromParams(params: HashMap<String, String>): String {
         if(params.isEmpty())
             return mapper.writeValueAsString(sessions)
-        return ""
+        var from = 0
+        var to = Integer.MAX_VALUE
+        if(params.containsKey("pageStart"))
+            from = params["pageStart"]!!.toInt()
+        from = if(from > 0) from else 0
+
+        if(params.containsKey("pageSize"))
+            to = params["pageSize"]!!.toInt()
+        to = if(to > 0) to else sessions.size
+
+        return mapper.writeValueAsString(sessions.subList(from, to))
     }
 
     fun getSessionByID(id: String): String {
