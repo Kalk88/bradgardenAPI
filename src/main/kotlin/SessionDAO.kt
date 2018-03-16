@@ -9,8 +9,9 @@ import kotlin.collections.ArrayList
  * Created by kalk on 6/20/17.
  */
 class SessionDAO(private val db: Database): DAOInterface<Session> {
-
-    private val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+    private val getWinners =  "select member from winner where game_session = ?"
+    private val getLosers =   "select member from loser where game_session = ?"
+    private val getTraitors = "select member from traitor where game_session = ?"
 
     override fun add(session: Session): Int {
         val sessionID: Int
@@ -22,7 +23,7 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
             val traitorStatement = "insert into traitor values (?, ?)"
             var insert = con.prepareStatement(insertSession)
             insert.setInt(1, session.gameID)
-            insert.setString(2, dtf.format(LocalDateTime.now()))
+            insert.setString(2, session.date)
             insert.executeQuery()
             insert.resultSet.next()
             sessionID = insert.resultSet.getInt(1)
@@ -53,7 +54,11 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
             stmt.setInt(2, offset)
             val rs = stmt.executeQuery()
             while (rs.next()) {
-              //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+                val w = retrieveRecord(getWinners, con, rs.getInt(1))
+                val l = retrieveRecord(getLosers, con, rs.getInt(1))
+                val t = retrieveRecord(getTraitors, con, rs.getInt(1))
+                sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3),
+                        winners = w, losers = l, traitors =  t))
             }
         } catch (e: Exception) {
             throw APIException("${e.message}")
@@ -65,9 +70,6 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
 
     override fun getDetailed(id: Int): Session {
         val getSession =  "select * from game_session where session_id=?"
-        val getWinners =  "select member from winner where game_session = ?"
-        val getLosers =   "select member from loser where game_session = ?"
-        val getTraitors = "select member from traitor where game_session = ?"
         var session: PreparedStatement
         val con = db.open()
         try {
@@ -96,7 +98,11 @@ class SessionDAO(private val db: Database): DAOInterface<Session> {
             val stmt = con.prepareStatement("select * from game_session")
             val rs = stmt.executeQuery()
             while (rs.next()) {
-                //  sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3)))
+                val w = retrieveRecord(getWinners, con, rs.getInt(1))
+                val l = retrieveRecord(getLosers, con, rs.getInt(1))
+                val t = retrieveRecord(getTraitors, con, rs.getInt(1))
+                sessions.add(Session(id = rs.getInt(1), gameID = rs.getInt(2), date = rs.getString(3),
+                        winners = w, losers = l, traitors =  t))
             }
         } catch (e: Exception) {
             throw APIException("${e.message}")
