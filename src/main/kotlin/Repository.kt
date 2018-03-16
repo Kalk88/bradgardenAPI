@@ -82,7 +82,17 @@ class Repository(private val memberDao: MemberDAO,
     fun getGameFromParams(params: HashMap<String, String>): String {
         if(params.isEmpty())
             return mapper.writeValueAsString(games)
-        return ""
+        var from = 0
+        var to = games.size
+        if(params.containsKey("pageStart"))
+            from = params["pageStart"]!!.toInt()
+        from = if(from > 0) from else 0
+
+        if(params.containsKey("pageSize"))
+            to = params["pageSize"]!!.toInt()
+        to = if(to > 0) to else games.size
+
+        return mapper.writeValueAsString(games.subList(from, to))
     }
 
     fun getGameByID(id: String): String {
@@ -146,7 +156,7 @@ class Repository(private val memberDao: MemberDAO,
         if(params.isEmpty())
             return mapper.writeValueAsString(sessions)
         var from = 0
-        var to = Integer.MAX_VALUE
+        var to = sessions.size
         if(params.containsKey("pageStart"))
             from = params["pageStart"]!!.toInt()
         from = if(from > 0) from else 0

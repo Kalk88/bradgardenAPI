@@ -14,7 +14,7 @@ class RepositoryTests {
     }
 
     private fun dummySession(id: Int): Session {
-        return Session(id, dateString, 1, listOf(1, 2, 3), listOf(3, 2, 1), listOf(1))
+        return Session(id, dateString, 1, listOf(1), listOf(3, 2), listOf(1))
     }
 
     private lateinit var mockMember: MemberDAO
@@ -157,15 +157,15 @@ class RepositoryTests {
         assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""".trimMargin(), gamesAsString)
     }
 
-    @Ignore //TODO
     @Test fun should_return_a_list_of_games_when_queryparam_are_zero() {
+        val toComp = arrayListOf(dummyGame(1), dummyGame(2))
         mockGame = mock {
-            on {getAll()} doReturn arrayListOf(dummyGame(1), dummyGame(2))
+            on {getAll()} doReturn toComp
         }
         val repository = Repository(mockMember, mockGame, mockSession)
-        val params = hashMapOf<String, String>("pageSize" to "0", "pageStart" to "0")
+        val params = hashMapOf("pageSize" to "0", "pageStart" to "0")
         val gamesAsString = repository.getGameFromParams(params)
-        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""".trimMargin(), gamesAsString)
+        assertEquals(jacksonObjectMapper().writeValueAsString(toComp), gamesAsString)
     }
 
     @Test fun should_return_game_from_ID() {
@@ -201,24 +201,34 @@ class RepositoryTests {
 
 
     @Test fun should_add_a_session() {
+        mockMember = mock {
+            on {getAll()} doReturn arrayListOf(dummyMember(1, first = "Jens", last = "Johnny"), dummyMember(2, first = "DJ"))
+        }
         mockSession = mock {
-            on {add(dummySession(0))} doReturn 1
+            on {getAll()} doReturn  arrayListOf(dummySession(1), dummySession(2))
+            on {add(dummySession(3))} doReturn 3
         }
         val repository = Repository(mockMember, mockGame, mockSession)
-        assertEquals(repository.add(dummySession(0)),"1")
+        assertEquals(repository.add(dummySession(3)),"3")
+        val jens = repository.getMemberByID("1")
+        val dj = repository.getMemberByID("2")
+        assert(jens.contains("\"wins\":101"))
+        assert(dj.contains("\"wins\":100"))
+        assert(jens.contains("\"gamesPlayed\":101"))
+        assert(dj.contains("\"gamesPlayed\":101"))
     }
 
 
     @Test fun should_return_a_list_of_sessions() {
+        val toComp = arrayListOf (dummySession(1), dummySession(2))
         mockSession = mock {
-            on {getAll()} doReturn  arrayListOf(dummySession(1), dummySession(2))
+            on {getAll()} doReturn toComp
         }
         val repository = Repository(mockMember, mockGame, mockSession)
         val params = hashMapOf<String, String>()
         val sessionsAsString = repository.getSessionFromParams(params)
-        assertEquals("""[{"id":1,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]},{"id":2,"date":"$dateString","gameID":1,"winners":[1,2,3],"losers":[3,2,1],"traitors":[1]}]""".trimMargin(), sessionsAsString)
+        assertEquals(jacksonObjectMapper().writeValueAsString(toComp), sessionsAsString)
     }
-
 
     @Test fun should_return_a_list_of_sessions_when_queryparam_are_zero() {
         val toComp = arrayListOf (dummySession(1), dummySession(2))
