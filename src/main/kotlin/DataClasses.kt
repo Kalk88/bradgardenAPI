@@ -35,7 +35,7 @@ data class Member(var id: Int = -1, val firstName: String, val lastName: String,
  */
 data class Game(var id: Int? = -1, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean) {
     init {
-        require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
+        //require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
         require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
     }
 }
