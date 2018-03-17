@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -31,7 +32,7 @@ class Server {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val db = HerokuDb()
-      //  val auth = Authorization(db)
+        //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         port(p)
@@ -59,7 +60,7 @@ class Server {
             }
             */
         }
-        
+
         get("/") { req, res ->
             "Hello"
         }
@@ -70,10 +71,14 @@ class Server {
         }
 
         post(MEMBERS) { req, res ->
-            val member = mapper.readValue<Member>(req.body())
-            val id = repository.add(member)
-            buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
-            res.body()
+            try {
+                val member = mapper.readValue<Member>(req.body())
+                val id = repository.add(member)
+                buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.body()
+            }  catch (e: JsonMappingException) {
+                throw APIException("invalid JSON")
+            }
         }
 
         get(MEMBERS) { req, res ->
@@ -96,10 +101,14 @@ class Server {
         }
 
         post(GAMES) { req, res ->
-            val game = mapper.readValue<Game>(req.body())
-            val id = repository.add(game)
-            buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
-            res.body()
+            try {
+                val game = mapper.readValue<Game>(req.body())
+                val id = repository.add(game)
+                buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.body()
+            } catch (e: JsonMappingException) {
+                throw APIException("invalid JSON")
+            }
         }
 
         get(GAMES) { req, res ->
@@ -123,10 +132,14 @@ class Server {
         }
 
         post(SESSIONS) { req, res ->
-            val session = mapper.readValue<Session>(req.body())
-            val id = repository.add(session)
-            buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
-            res.body()
+            try {
+                val session = mapper.readValue<Session>(req.body())
+                val id = repository.add(session)
+                buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.body()
+            } catch (e: JsonMappingException) {
+                throw APIException("invalid JSON")
+            }
         }
 
         get(SESSIONS) { req, res ->
