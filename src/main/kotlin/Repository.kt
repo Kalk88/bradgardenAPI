@@ -32,10 +32,20 @@ class Repository(private val memberDao: MemberDAO,
         return id
     }
 
+    //OR this mess
     fun getMemberFromParams(params: HashMap<String, String>): String {
         if(params.isEmpty())
             return mapper.writeValueAsString(members)
-        return ""
+        var from = 0
+        var to = members.size
+        if(params.containsKey("pageStart"))
+            from = params["pageStart"]!!.toInt()
+        from = if(from > 0) from else 0
+
+        if(params.containsKey("pageSize"))
+            to = params["pageSize"]!!.toInt()
+        to = if(to > 0) to else members.size
+        return mapper.writeValueAsString(members.subList(from, to))
     }
 
     fun getMemberByID(id: String): String {

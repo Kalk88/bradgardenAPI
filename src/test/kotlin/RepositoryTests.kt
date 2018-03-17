@@ -208,10 +208,19 @@ class RepositoryTests {
             on {getAll()} doReturn  arrayListOf(dummySession(1), dummySession(2))
             on {add(dummySession(3))} doReturn 3
         }
+
         val repository = Repository(mockMember, mockGame, mockSession)
-        assertEquals(repository.add(dummySession(3)),"3")
-        val jens = repository.getMemberByID("1")
-        val dj = repository.getMemberByID("2")
+
+        var jens = repository.getMemberByID("1")
+        var dj = repository.getMemberByID("2")
+        assert(jens.contains("\"wins\":100"))
+        assert(dj.contains("\"wins\":100"))
+        assert(jens.contains("\"gamesPlayed\":100"))
+        assert(dj.contains("\"gamesPlayed\":100"))
+        val res = repository.add(dummySession(3))
+        assertEquals(res,"3")
+        jens = repository.getMemberByID("1")
+        dj = repository.getMemberByID("2")
         assert(jens.contains("\"wins\":101"))
         assert(dj.contains("\"wins\":100"))
         assert(jens.contains("\"gamesPlayed\":101"))

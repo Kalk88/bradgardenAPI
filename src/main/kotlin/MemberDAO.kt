@@ -112,6 +112,7 @@ class MemberDAO(private val db: Database): DAOInterface<Member> {
         return member
     }
 
+    //TODO FIX THIS MESS
     override fun getAll(): ArrayList<Member> {
         val members = ArrayList<Member>()
         val con = db.open()
