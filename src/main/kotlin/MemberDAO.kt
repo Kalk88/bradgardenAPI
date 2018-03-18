@@ -145,6 +145,7 @@ class MemberDAO(private val db: Database): DAOInterface<Member> {
         val stmt = con.prepareStatement(query)
         stmt.setInt(1, id)
         val rs = stmt.executeQuery()
+        rs.next()
         return  rs.getInt(1)
     }
 }
