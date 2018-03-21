@@ -34,8 +34,9 @@ class Server {
         val db = HerokuDb()
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
-        val p = if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
-        port(p)
+        port(
+                if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
+        )
 
         before("/*") {req, res ->
             res.header("Access-Control-Allow-Origin", "*")
@@ -64,6 +65,7 @@ class Server {
         get("/") { req, res ->
             "Hello"
         }
+
 
         get(ENDPOINTS) { req, res ->
             buildResponse(body=mapper.writeValueAsString(publicEndpoints), response = res)
