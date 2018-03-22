@@ -3,9 +3,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLogging
+import spark.ModelAndView
 import spark.Response
 import spark.Spark.*
+import spark.template.mustache.MustacheTemplateEngine
 import java.util.*
+import kotlin.Comparator
 
 /**
  * Created by kalk on 7/5/17.
@@ -31,7 +34,8 @@ class Server {
     fun start() {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = HerokuDb()
+        //val db = HerokuDb()
+        val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
@@ -62,9 +66,15 @@ class Server {
             */
         }
 
-        get("/") { req, res ->
-            "Hello"
-        }
+        get("/",  { req, res ->
+            val members = db.memberDao().getAll()
+                    .filter { it.gamesPlayed >= 10 }
+                    .sortedWith(compareBy(Member::winRatio))
+                    .reversed() //Because im to lazy to write my own comparator
+            val res = hashMapOf("members" to members)
+            ModelAndView(res, "/home/kalk/IdeaProjects/bradgardenAPI/src/main/resources/leaderboard.mustasche")
+        }, MustacheTemplateEngine()
+        )
 
 
         get(ENDPOINTS) { req, res ->

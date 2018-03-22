@@ -1,0 +1,11 @@
+<h1> Brädgården Leaderboard </h1>
+{{#members}}
+    <ul>
+     <h3> {{ firstName }} {{ lastName }} </h3>
+     <li> Games Played: {{ gamesPlayed }}         </li>
+     <li> Wins: {{ wins }}                        </li>
+     <li> Losses: {{ losses }}                    </li>
+     <li> Ratio {{ winRatio }}                    </li>
+     <li> Times Traitor: {{ timesTraitor }}       </li>
+    </ul>
+{{/members}}
