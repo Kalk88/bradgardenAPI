@@ -169,7 +169,7 @@ class Server {
         }
 
         delete(SESSION_ID) { req, res ->
-            repository.removeSessionWithID(":id")
+            repository.removeSessionWithID(req.params(":id"))
             buildResponse(statusCode=HTTP_NO_CONTENT, type ="", response = res)
             res.body()
         }
