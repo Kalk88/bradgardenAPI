@@ -15,26 +15,34 @@
 </head>
 
 <body>
-<h1> Welcome to Brädgården! </h1>
 
-<h1> Leaderboard </h1>
-<section id = "memberlist">
-
-    {{#members}}
-    <ul id = "member">
-        <h3> {{ firstName }} {{ lastName }} </h3>
-        <li> Games Played: {{ gamesPlayed }}         </li>
-        <li> Wins: {{ wins }}                        </li>
-        <li> Losses: {{ losses }}                    </li>
-        <li> Ratio {{ winRatio }}                    </li>
-        <li> Times Traitor: {{ timesTraitor }}       </li>
-    </ul>
-    {{/members}}
-
+<section>
+    <h1 id="intro"> Welcome to Brädgården! </h1>
 </section>
 
+<section>
+    <h1 id="leaderboard"> Leaderboard </h1>
+    <picture id="logo">
+        <img src="brädgårdenlogo.png" alt="Brägrådens logo">
+    </picture>
+    <div id="members">
+        {{#members}}
+        <ul>
+            <h3> {{ firstName }} {{ lastName }} </h3>
+            <li> Games Played: {{ gamesPlayed }}         </li>
+            <li> Wins: {{ wins }}                        </li>
+            <li> Losses: {{ losses }}                    </li>
+            <li> Ratio {{ winRatio }}                    </li>
+            <li> Times Traitor: {{ timesTraitor }}       </li>
+        </ul>
+        {{/members}}
+    </div>
+    <div style="clear:both;"></div>
+</section>
+
+
 </body>
-<footer>
+<footer id="footer">
     Brädgården is a board gaming society in Malmö
 </footer>
 </html>

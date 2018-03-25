@@ -1,27 +1,58 @@
 body {
   font-family: "Georgia", serif;
-  font-family: 'Audiowide';
-  line-height: 1.8em;
+  line-height: 1.2em;
   color: #333;
   margin: auto;
   width: 50%;
-  background-image: url("brädgårdenlogo.png");
-  background-size: contain;
-  background-position: right -15px;
-  background-repeat: no-repeat;
 }
 
-member {
-
+section {
+    padding:10px;
 }
 
-footer {
 
-}
-
-.audiowide {
+#leaderboard {
     font-family: 'Audiowide';
     font-size: 22px;
+    position: center;
+    width:100%;
+}
+
+#footer {
+     font-family: 'Audiowide';
+     font-size: 12px;
+     padding-top: 10px;
+     padding-bottom: 0px;
+     position:relative;
+     bottom:0;
+     width:100%;
+}
+
+#intro {
+    font-family: 'Audiowide';
+    font-size: 30px;
+    position: relative;
+    width:100%;
+}
+
+
+#logo {
+    padding: 10px;
+    float: right;
+    height: auto;
+    width: auto;
+    min-width: 10%;
+    min-height: 10%;
+    max-width: 50%;
+    max-height: 50%;
+
+}
+
+#members {
+    float:left;
+    font-family: 'Audiowide';
+    font-size: 18px;
+    padding: 10px;
 }
 
 .center {

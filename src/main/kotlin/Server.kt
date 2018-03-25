@@ -35,8 +35,8 @@ class Server {
         staticFiles.location("/public")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = HerokuDb()
-      //  val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
+        //val db = HerokuDb()
+        val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
