@@ -32,6 +32,7 @@ class Server {
     companion object: KLogging()
 
     fun start() {
+        staticFiles.location("/public")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         //val db = HerokuDb()
@@ -68,11 +69,11 @@ class Server {
 
         get("/",  { req, res ->
             val members = db.memberDao().getAll()
-                    .filter { it.gamesPlayed >= 10 }
+                    .filter { it.gamesPlayed >= 5 }
                     .sortedWith(compareBy(Member::winRatio))
                     .reversed() //Because im to lazy to write my own comparator
             val res = hashMapOf("members" to members)
-            ModelAndView(res, "/home/kalk/IdeaProjects/bradgardenAPI/src/main/resources/leaderboard.mustasche")
+            ModelAndView(res, "/leaderboard.html")
         }, MustacheTemplateEngine()
         )
 

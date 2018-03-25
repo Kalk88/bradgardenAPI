@@ -1,0 +1,32 @@
+body {
+  font-family: "Georgia", serif;
+  font-family: 'Audiowide';
+  line-height: 1.8em;
+  color: #333;
+  margin: auto;
+  width: 50%;
+  background-image: url("brädgårdenlogo.png");
+  background-size: contain;
+  background-position: right -15px;
+  background-repeat: no-repeat;
+}
+
+member {
+
+}
+
+footer {
+
+}
+
+.audiowide {
+    font-family: 'Audiowide';
+    font-size: 22px;
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
+}
