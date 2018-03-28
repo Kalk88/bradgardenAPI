@@ -35,8 +35,8 @@ class Server {
         staticFiles.location("/public")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = HerokuDb()
-        //val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
+        //val db = HerokuDb()
+        val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
@@ -74,8 +74,11 @@ class Server {
                     .reversed() //Because im to lazy to write my own comparator
             val res = hashMapOf("members" to members)
             ModelAndView(res, "/leaderboard.html")
-        }, MustacheTemplateEngine()
-        )
+        }, MustacheTemplateEngine())
+
+        get("/privacy-policy", {req, res ->
+            res.redirect("privacy_policy.html")
+        })
 
 
         get(ENDPOINTS) { req, res ->
