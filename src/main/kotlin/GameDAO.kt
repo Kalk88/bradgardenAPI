@@ -54,7 +54,7 @@ class GameDAO(private val db: Database): DAOInterface<Game>  {
         val games = ArrayList<Game>()
         val con = db.open()
         try{
-            val stmt =  con.prepareStatement("select * from game limit ? offset ?")
+            val stmt =  con.prepareStatement("select * from game limit ? offset ? where active = true")
             stmt.setInt(1, limit)
             stmt.setInt(2, offset)
             stmt.executeQuery()
@@ -79,7 +79,7 @@ class GameDAO(private val db: Database): DAOInterface<Game>  {
         val games = ArrayList<Game>()
         val con = db.open()
         try{
-            val stmt =  con.prepareStatement("select * from game")
+            val stmt =  con.prepareStatement("select * from game where active = true")
             stmt.executeQuery()
             val rs = stmt.resultSet
             while(rs.next()){
@@ -94,10 +94,14 @@ class GameDAO(private val db: Database): DAOInterface<Game>  {
         return games
     }
 
+
+    /**
+     * Does not actually delete the game only sets active to false, this is due to not having game sessions with game_id null.
+     */
     override fun delete(id: Int): Boolean{
         val con = db.open()
         try{
-            val stmt = con.prepareStatement("delete from game where game_id = ?")
+            val stmt = con.prepareStatement("update game set active = false where game_id = ?")
             stmt.setInt(1,id)
             stmt.execute()
             return true

@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS game
   game_name   VARCHAR(50) NOT NULL,
   max_players INTEGER NOT NULL,
   traitor     BOOLEAN NOT NULL,
-  co_op       BOOLEAN NOT NULL
+  co_op       BOOLEAN NOT NULL,
+  active      BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS game_session
