@@ -51,8 +51,8 @@ data class Game(var id: Int? = -1, val name: String, val maxNumOfPlayers: Int, v
 data class Session(var id: Int = -1, var date: String?, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>) {
     init {
         if(date == null) {
-            val tz = TimeZone.getTimeZone("GMT")
-            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+            val tz = TimeZone.getTimeZone("Europe/Copenhagen")
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
             df.timeZone = tz
             date = df.format(Date())
         }
