@@ -1,5 +1,9 @@
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.text.DateFormat
+import java.util.*
+
 
 /**
  * All data classes for this project.
@@ -46,7 +50,11 @@ data class Game(var id: Int? = -1, val name: String, val maxNumOfPlayers: Int, v
  */
 data class Session(var id: Int = -1, var date: String?, val gameID: Int, val winners: List<Int>, val losers: List<Int>, val traitors: List<Int>) {
     init {
-        val time = LocalDateTime.now()
-        date = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        if(date == null) {
+            val tz = TimeZone.getTimeZone("GMT")
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+            df.timeZone = tz
+            date = df.format(Date())
+        }
     }
 }
