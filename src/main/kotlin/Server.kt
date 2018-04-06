@@ -7,6 +7,8 @@ import spark.ModelAndView
 import spark.Response
 import spark.Spark.*
 import spark.template.mustache.MustacheTemplateEngine
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.*
 import kotlin.Comparator
 
@@ -29,14 +31,19 @@ const val HTTP_BAD_REQUEST = 400
 class APIException(message: String) : Exception(message)
 
 class Server {
+    private val eTagMap = mutableMapOf(
+            MEMBERS to generateEtag(),
+            GAMES to generateEtag(),
+            SESSIONS to generateEtag()
+    )
     companion object: KLogging()
 
     fun start() {
         staticFiles.location("/public")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        val db = HerokuDb()
-        //val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
+        //val db = HerokuDb()
+        val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
@@ -90,6 +97,7 @@ class Server {
             try {
                 val member = mapper.readValue<Member>(req.body())
                 val id = repository.add(member)
+                eTagMap[MEMBERS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             }  catch (e: JsonMappingException) {
@@ -99,8 +107,14 @@ class Server {
 
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val members = repository.getMemberFromParams(params)
-            buildResponse(statusCode = HTTP_OK, body = members, response = res)
+            if(params.isEmpty()
+                    && !req.headers("eTag").isNullOrEmpty()
+                    && validateEtag(req.headers("eTag"), MEMBERS)) {
+                buildResponse(eTag = eTagMap[MEMBERS]!!, statusCode = HTTP_NO_CONTENT, response = res)
+            } else {
+                val members = repository.getMemberFromParams(params)
+                buildResponse(eTag = eTagMap[MEMBERS]!!, statusCode = HTTP_OK, body = members, response = res)
+            }
             res.body()
         }
 
@@ -120,6 +134,7 @@ class Server {
             try {
                 val game = mapper.readValue<Game>(req.body())
                 val id = repository.add(game)
+                eTagMap[GAMES] = generateEtag()
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: JsonMappingException) {
@@ -129,8 +144,14 @@ class Server {
 
         get(GAMES) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val games = repository.getGameFromParams(params)
-            buildResponse(statusCode = HTTP_OK, body = games, response = res)
+            if(params.isEmpty()
+                    && !req.headers("eTag").isNullOrEmpty()
+                    && validateEtag(req.headers("eTag"), GAMES)) {
+                buildResponse(eTag = eTagMap[GAMES]!!, statusCode = HTTP_NO_CONTENT, response = res)
+            } else {
+                val games = repository.getGameFromParams(params)
+                buildResponse(eTag = eTagMap[GAMES]!!, statusCode = HTTP_OK, body = games, response = res)
+            }
             res.body()
         }
 
@@ -151,6 +172,8 @@ class Server {
             try {
                 val session = mapper.readValue<Session>(req.body())
                 val id = repository.add(session)
+                eTagMap[MEMBERS] = generateEtag()
+                eTagMap[SESSIONS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
                 res.body()
             } catch (e: JsonMappingException) {
@@ -160,8 +183,15 @@ class Server {
 
         get(SESSIONS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            val sessions = repository.getSessionFromParams(params)
-            buildResponse(statusCode = HTTP_OK, body = sessions, response = res)
+
+            if(params.isEmpty()
+                    && !req.headers("eTag").isNullOrEmpty()
+                    && validateEtag(req.headers("eTag"), SESSIONS)) {
+                buildResponse(eTag = eTagMap[SESSIONS]!!, statusCode = HTTP_NO_CONTENT, response = res)
+            }  else {
+                val sessions = repository.getSessionFromParams(params)
+                buildResponse(eTag = eTagMap[SESSIONS]!!, statusCode = HTTP_OK, body = sessions, response = res)
+            }
             res.body()
         }
 
@@ -184,12 +214,20 @@ class Server {
         })
     }
 
-    private fun buildResponse(statusCode:Int = HTTP_OK, type:String = JSON, body: String = "", response: Response): Response {
-        response.header("Cache-Control", "max-age=3600")
+    private fun buildResponse(eTag: String = "", statusCode:Int = HTTP_OK, type:String = JSON, body: String = "", response: Response): Response {
+        response.header("eTag", eTag)
         response.status(statusCode)
         response.type(type)
         response.body(body)
         return response
+    }
+
+    private fun validateEtag(etag: String , route: String):Boolean {
+        return etag == eTagMap[route]
+    }
+
+    private fun generateEtag() :String {
+        return java.util.UUID.randomUUID().toString()
     }
 
     private fun toJSON(key: String, value: Any): String {
