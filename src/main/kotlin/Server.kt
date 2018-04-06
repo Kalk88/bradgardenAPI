@@ -23,6 +23,8 @@ const val GAME_ID = "/api/games/:id"
 const val SESSIONS = "/api/sessions"
 const val SESSION_ID ="/api/sessions/:id"
 const val JSON ="application/json"
+const val ETAG = "eTag"
+const val IF_MODIFIED_SINCE = "If-Modified-Since"
 const val HTTP_OK = 200
 const val HTTP_CREATED = 201
 const val HTTP_NO_CONTENT = 204
@@ -108,8 +110,8 @@ class Server {
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
             if(params.isEmpty()
-                    && !req.headers("eTag").isNullOrEmpty()
-                    && validateEtag(req.headers("eTag"), MEMBERS)) {
+                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+                    && validateEtag(req.headers(IF_MODIFIED_SINCE), MEMBERS)) {
                 buildResponse(eTag = eTagMap[MEMBERS]!!, statusCode = HTTP_NO_CONTENT, response = res)
             } else {
                 val members = repository.getMemberFromParams(params)
@@ -145,8 +147,8 @@ class Server {
         get(GAMES) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
             if(params.isEmpty()
-                    && !req.headers("eTag").isNullOrEmpty()
-                    && validateEtag(req.headers("eTag"), GAMES)) {
+                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+                    && validateEtag(req.headers(IF_MODIFIED_SINCE), GAMES)) {
                 buildResponse(eTag = eTagMap[GAMES]!!, statusCode = HTTP_NO_CONTENT, response = res)
             } else {
                 val games = repository.getGameFromParams(params)
@@ -185,8 +187,8 @@ class Server {
             val params = exctractQueryParams(req.queryMap().toMap())
 
             if(params.isEmpty()
-                    && !req.headers("eTag").isNullOrEmpty()
-                    && validateEtag(req.headers("eTag"), SESSIONS)) {
+                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+                    && validateEtag(req.headers(IF_MODIFIED_SINCE), SESSIONS)) {
                 buildResponse(eTag = eTagMap[SESSIONS]!!, statusCode = HTTP_NO_CONTENT, response = res)
             }  else {
                 val sessions = repository.getSessionFromParams(params)
@@ -215,7 +217,7 @@ class Server {
     }
 
     private fun buildResponse(eTag: String = "", statusCode:Int = HTTP_OK, type:String = JSON, body: String = "", response: Response): Response {
-        response.header("eTag", eTag)
+        response.header(ETAG, eTag)
         response.status(statusCode)
         response.type(type)
         response.body(body)
