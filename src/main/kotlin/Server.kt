@@ -185,6 +185,7 @@ class Server {
     }
 
     private fun buildResponse(statusCode:Int = HTTP_OK, type:String = JSON, body: String = "", response: Response): Response {
+        response.header("Cache-Control", "max-age=3600")
         response.status(statusCode)
         response.type(type)
         response.body(body)
