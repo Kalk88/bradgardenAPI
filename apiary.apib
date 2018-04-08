@@ -61,18 +61,6 @@ This operation retrive a single member with more information than get members.
 + Response 200 (application/json)
     + Attributes (array[MemberWithStats1])
 
-### Update Member [PUT]
-This operation updates a member in the collection.
-+  Request (application/json)
-    + Headers
-
-                 Authorization: 1234Example
-    + Attributes(MemberWithId1)
-
-+ Response 204
-    + Headers
-
-                 Location: /api/members/id
 
 ### Remove Member [DELETE]
 This operation removes a member permanently from the collection. Use with caution as all stats will be lost.
