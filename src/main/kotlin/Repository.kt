@@ -128,6 +128,10 @@ class Repository(private val memberDao: MemberDAO,
     }
 
     fun add(session: Session): String {
+        if(winnersInLosers(session.winners, session.losers))
+            throw APIException("Winners can't also be losers")
+        if(!traitorIsInWinnersOrLosers(session.traitors, session.winners, session.losers))
+            throw APIException("One traitor did not win or lose.")
         val id = sessionDao.add(session)
         session.id = id
         sessions.add(session)
