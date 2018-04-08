@@ -4,18 +4,7 @@ import org.junit.*
 import org.junit.Assert.*
 
 class RepositoryTests {
-    private val dateString = "1997-07-16T19:20:30.45+01:00";
-    private fun dummyMember(id: Int, first: String = "Anthony", last: String = "Dankfano"): Member {
-        return Member(id, first, last, 100, 1.0, 0, 0, 100)
-    }
 
-    private fun dummyGame(id: Int, name: String = "dummy"): Game {
-        return Game(id, name, 100, true, true)
-    }
-
-    private fun dummySession(id: Int): Session {
-        return Session(id, dateString, 1, listOf(1), listOf(3, 2), listOf(1))
-    }
 
     private lateinit var mockMember: MemberDAO
     private lateinit var mockGame: GameDAO

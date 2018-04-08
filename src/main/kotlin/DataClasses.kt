@@ -1,4 +1,5 @@
 
+import org.jetbrains.annotations.Mutable
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,26 +20,28 @@ import java.util.*
  * @param timesTraitor Int
  * @param gamesPlayed Int
  */
-data class Member(var id: Int = -1, val firstName: String, val lastName: String,
+data class Member(var id: Int = -1, var firstName: String, var lastName: String,
                   var wins: Int, var winRatio: Double, var losses: Int,
                   var timesTraitor: Int, var gamesPlayed: Int) {
     init {
         val numbers = Regex(".*\\d+.*")
-        require(!firstName.matches(numbers) && !lastName.matches(numbers)) {"Invalid name."}
-        require(firstName.length > 1) {"$firstName is invalid, must be at least 2 characters."}
-        require(lastName.length > 1) {"$lastName is invalid, Name must be at least 2 characters."}
+        require(!firstName.first().isWhitespace())
+        require(!lastName.first().isWhitespace())
+        require(!firstName.matches(numbers) && !lastName.matches(numbers)) { "Invalid name." }
+        require(firstName.length > 1) { "$firstName is invalid, must be at least 2 characters." }
+        require(lastName.length > 1) { "$lastName is invalid, Name must be at least 2 characters." }
+        firstName = transformTitleCase(firstName)
+        lastName = transformTitleCase(lastName)
     }
-
-
 }
-
 /**
  * Represents a game owned by brädgården
  */
-data class Game(var id: Int? = -1, val name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean) {
+data class Game(var id: Int? = -1, var name: String, val maxNumOfPlayers: Int, val traitor: Boolean, val coop: Boolean) {
     init {
         require(maxNumOfPlayers > 0) {"Number of players must be greater than 0"}
         require(name.length > 1) {"${name} is invalid, must be at least 2 characters."}
+        name = transformTitleCase(name)
     }
 }
 
@@ -56,3 +59,16 @@ data class Session(var id: Int = -1, var date: String?, val gameID: Int, val win
         }
     }
 }
+
+fun transformTitleCase( text:String): String {
+    var sb = StringBuilder()
+    sb.append(text.first().toUpperCase())
+    for (index in 1 until text.length) {
+        if(text[index-1].isWhitespace())
+            sb.append(text[index].toUpperCase())
+        else sb.append(text[index].toLowerCase())
+    }
+
+    return sb.toString()
+}
+
