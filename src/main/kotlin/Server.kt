@@ -7,10 +7,7 @@ import spark.ModelAndView
 import spark.Response
 import spark.Spark.*
 import spark.template.mustache.MustacheTemplateEngine
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.util.*
-import kotlin.Comparator
 
 /**
  * Created by kalk on 7/5/17.
@@ -44,12 +41,12 @@ class Server {
         staticFiles.location("/public")
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
-        //val db = HerokuDb()
-        val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
+        val db = HerokuDb()
+        //val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
-                if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
+            if(System.getenv("PORT").isNullOrEmpty()) 8080 else System.getenv("PORT").toInt()
         )
 
         before("/*") {req, res ->
@@ -109,8 +106,7 @@ class Server {
 
         get(MEMBERS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            if(params.isEmpty()
-                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+            if(params.isEmpty() && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
                     && validateEtag(req.headers(IF_MODIFIED_SINCE), MEMBERS)) {
                 buildResponse(eTag = eTagMap[MEMBERS]!!, statusCode = HTTP_NO_CONTENT, response = res)
             } else {
@@ -146,8 +142,7 @@ class Server {
 
         get(GAMES) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
-            if(params.isEmpty()
-                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+            if(params.isEmpty() && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
                     && validateEtag(req.headers(IF_MODIFIED_SINCE), GAMES)) {
                 buildResponse(eTag = eTagMap[GAMES]!!, statusCode = HTTP_NO_CONTENT, response = res)
             } else {
@@ -186,8 +181,7 @@ class Server {
         get(SESSIONS) { req, res ->
             val params = exctractQueryParams(req.queryMap().toMap())
 
-            if(params.isEmpty()
-                    && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
+            if(params.isEmpty() && !req.headers(IF_MODIFIED_SINCE).isNullOrEmpty()
                     && validateEtag(req.headers(IF_MODIFIED_SINCE), SESSIONS)) {
                 buildResponse(eTag = eTagMap[SESSIONS]!!, statusCode = HTTP_NO_CONTENT, response = res)
             }  else {
