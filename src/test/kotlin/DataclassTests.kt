@@ -1,4 +1,7 @@
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DataclassTests {
@@ -17,4 +20,14 @@ class DataclassTests {
         val game = dummyGame(1, "the liFE Of LEIf")
         assertTrue(game.name == "The Life Of Leif")
     }
+
+    @Test fun should_create_valid_dateString() {
+        val session = Session(-1, null, 1, listOf(1), listOf(3, 2), listOf(1))
+        val tz = TimeZone.getTimeZone("Europe/Copenhagen")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        df.timeZone = tz
+        val date = df.format(Date())
+        assertEquals(date, session.date, "should be equal, can fail if hh/mm just about to change")
+    }
+
 }

@@ -52,7 +52,7 @@ data class Session(var id: Int = -1, var date: String?, val gameID: Int, val win
     init {
         if(date == null) {
             val tz = TimeZone.getTimeZone("Europe/Copenhagen")
-            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
             df.timeZone = tz
             date = df.format(Date())
         }
