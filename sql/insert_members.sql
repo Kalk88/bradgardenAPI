@@ -3,4 +3,4 @@ insert into member (first_name, last_name) values
 ('Petter', 'Månsson'),
 ('Axel', 'Månsson'),
 ('Charles', 'Nordström'),
-('Jonathan', 'Hagberg')
+('Jonathan', 'Hagberg');
