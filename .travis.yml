@@ -5,10 +5,14 @@ jdk:
 services:
   - docker
 
+env:
+  - JDBC_DATABASE_URL=jdbc:postgresql://172.17.0.2:5432/postgres?user=postgres
+
 before_install:
   - docker pull postgres
   - docker run -d -p 127.0.0.2:5432:5432 --name bradgardenDB -d postgres:latest
+  -
   - npm install -g dredd@3.4.2
 script:
 - mvn test -B
-- ./scipts/dreddTest.sh
+- dredd
