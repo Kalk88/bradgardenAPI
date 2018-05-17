@@ -11,12 +11,13 @@ env:
 cache:
   directories:
     - node_modules
+    - $HOME/.m2
 
 before_install:
   - docker pull postgres
   - docker run -d -p 127.0.0.2:5432:5432 --name bradgardenDB -d postgres:latest
-  -
   - npm install -g dredd@3.4.2
 script:
 - mvn test -B
+- psql -h 127.0.0.2 -p 5432 -U postgres -f sql/bradgardenDB.sql
 - dredd
