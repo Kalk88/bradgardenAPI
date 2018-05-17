@@ -97,6 +97,7 @@ class Server {
                 val id = repository.add(member)
                 eTagMap[MEMBERS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/members/$id")
                 res.body()
             }  catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
@@ -133,6 +134,7 @@ class Server {
                 val id = repository.add(game)
                 eTagMap[GAMES] = generateEtag()
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/games/$id")
                 res.body()
             } catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
@@ -171,6 +173,7 @@ class Server {
                 eTagMap[MEMBERS] = generateEtag()
                 eTagMap[SESSIONS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/sessions/$id")
                 res.body()
             } catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
