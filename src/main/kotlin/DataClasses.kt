@@ -9,7 +9,6 @@ import java.util.*
 
 /**
  * Represents a member in brädgården
- * Id, first and last name is set once, other attributes can be mutated.
  * @param id  Int
  * @param firstName String
  * @param lastName String
