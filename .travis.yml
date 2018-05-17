@@ -20,4 +20,4 @@ before_install:
 script:
 - mvn package
 - cat sql/bradgardenDB.sql sql/insert_members.sql | psql -h 127.0.0.2 -p 5432 -U postgres
-- dredd
+- dredd --sorted
