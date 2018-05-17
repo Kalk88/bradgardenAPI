@@ -19,5 +19,5 @@ before_install:
   - npm install -g dredd@3.4.2
 script:
 - mvn package
-- psql -h 127.0.0.2 -p 5432 -U postgres -f sql/bradgardenDB.sql
+- cat sql/bradgardenDB.sql sql/insert_members.sql | psql -h 127.0.0.2 -p 5432 -U postgres
 - dredd
