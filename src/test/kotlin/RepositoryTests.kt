@@ -5,7 +5,6 @@ import org.junit.Assert.*
 
 class RepositoryTests {
 
-
     private lateinit var mockMember: MemberDAO
     private lateinit var mockGame: GameDAO
     private lateinit var mockSession: SessionDAO
@@ -25,7 +24,7 @@ class RepositoryTests {
         assertEquals(repository.add(data),"1")
     }
 
-    @Test (expected = IllegalArgumentException::class)
+    @Test (expected = NoSuchElementException::class)
     fun should_not_add_member_when_name_is_too_short() {
         val repository = Repository(mockMember, mockGame, mockSession)
         repository.add(dummyMember(0, first = "fail", last = ""))
@@ -143,7 +142,7 @@ class RepositoryTests {
         val repository = Repository(mockMember, mockGame, mockSession)
 
         val gamesAsString = repository.getGameFromParams(params)
-        assertEquals("""[{"id":1,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true},{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}]""".trimMargin(), gamesAsString)
+        assertEquals(jacksonObjectMapper().writeValueAsString(arrayListOf(dummyGame(1), dummyGame(2))), gamesAsString)
     }
 
     @Test fun should_return_a_list_of_games_when_queryparam_are_zero() {
@@ -164,7 +163,7 @@ class RepositoryTests {
         }
         val repository = Repository(mockMember, mockGame, mockSession)
         val gameAsString = repository.getGameByID("2")
-        assertEquals("""{"id":2,"name":"dummy","maxNumOfPlayers":100,"traitor":true,"coop":true}""", gameAsString)
+        assertEquals(jacksonObjectMapper().writeValueAsString(dummyGame(2)), gameAsString)
     }
 
     @Test  (expected = APIException::class)
