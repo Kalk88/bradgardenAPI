@@ -5,4 +5,4 @@ insert into game (game_name, max_players, traitor, co_op) values
 ('Tiny Epic Galaxies', 5, false, false),
 ('Zombie Dice', 8, false, false),
 ('Twilight Imperium', 8, false, false),
-('Star Realms', 2, false, false)
+('Star Realms', 2, false, false);

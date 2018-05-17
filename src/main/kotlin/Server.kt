@@ -20,8 +20,8 @@ const val GAME_ID = "/api/games/:id"
 const val SESSIONS = "/api/sessions"
 const val SESSION_ID ="/api/sessions/:id"
 const val JSON ="application/json"
-const val ETAG = "eTag"
-const val IF_MODIFIED_SINCE = "If-Modified-Since"
+const val ETAG = "etag"
+const val IF_MODIFIED_SINCE = "if-modified-since"
 const val HTTP_OK = 200
 const val HTTP_CREATED = 201
 const val HTTP_NO_CONTENT = 204
@@ -42,7 +42,6 @@ class Server {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val db = HerokuDb()
-        //val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
@@ -98,6 +97,7 @@ class Server {
                 val id = repository.add(member)
                 eTagMap[MEMBERS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/members/$id")
                 res.body()
             }  catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
@@ -134,6 +134,7 @@ class Server {
                 val id = repository.add(game)
                 eTagMap[GAMES] = generateEtag()
                 buildResponse(statusCode=HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/games/$id")
                 res.body()
             } catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
@@ -154,8 +155,9 @@ class Server {
 
         put(GAME_ID) { req, res ->
             val game = mapper.readValue<Game>(req.body())
-            repository.update(req.params(":id"), game)
+            val id = repository.update(req.params(":id"), game)
             buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
+            res.header("Location", "/api/games/$id")
             res.body()
         }
 
@@ -172,6 +174,7 @@ class Server {
                 eTagMap[MEMBERS] = generateEtag()
                 eTagMap[SESSIONS] = generateEtag()
                 buildResponse(statusCode = HTTP_CREATED, body = toJSON("id", id), response = res)
+                res.header("Location", "/api/sessions/$id")
                 res.body()
             } catch (e: JsonMappingException) {
                 throw APIException("invalid JSON")
