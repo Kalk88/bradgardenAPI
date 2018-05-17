@@ -12,7 +12,11 @@ Retrives a list of callable endpoints.
 
 + Response 200 (application/json)
 
-    + Attributes(array[Endpoint])
+    + Attributes  (object)
+        - games: /api/games (string, required)
+        - sessions: /api/sessions (string, required)
+        - members: /api/members (string, required)
+
 
 # Group Members
 ## Collection Members [/api/members]
@@ -24,14 +28,29 @@ This operation adds a member to the collection. It take the first and last name 
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(Member1)
+
+    + Attributes (BaseMember, required)
 
 + Response 201 (application/json)
     + Headers
 
-                 Location: /api/members/id
+                Location: /api/members/id
+
+    + Attributes(Id)
+
++  Request (application/json)
+    + Headers
+
+                 Authorization: 1234Example
+
+    + Attributes (BaseMember, required)
+        - firstName: j
+        - lastName: j
+
++ Response 400 (application/json)
+
     + Attributes
-        + id: 1 (number) - Id of member.
+        - error_message: invalid JSON
 
 ### Get Members [GET /api/members{?pageSize,pageStart}]
 This operation retrives an array of members.
@@ -45,11 +64,14 @@ This operation retrives an array of members.
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes (array[MemberWithStats1, MemberWithStats2, MemberWithStats3 ])
 
-### Single Member [/api/members/{id}]
+    + Attributes (array[Member])
+
+
+
+### Single Member [/api/members/{Id}]
 + Parameters
-    + id: 1 (number) - Id of member.
+    + Id: 1
 
 ### Get a Member [GET]
 This operation retrive a single member with more information than get members.
@@ -59,7 +81,7 @@ This operation retrive a single member with more information than get members.
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes (array[MemberWithStats1])
+    + Attributes (Member)
 
 
 ### Remove Member [DELETE]
@@ -80,14 +102,20 @@ This operation adds a game to the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(Game1)
+
+    + Attributes(BaseGame)
 
 + Response 201 (application/json)
     + Headers
 
                  Location: /api/members/id
+
+    + Attributes(Id)
+
++ Response 400 (application/json)
+
     + Attributes
-        + id: 1 (number) - Id of game.
+        - error_message: invalid JSON
 
 ### Get Games [GET /api/games{?pageSize,pageStart}]
 This operation retrives a list of board games. may be filtered with query parameters.
@@ -101,7 +129,8 @@ This operation retrives a list of board games. may be filtered with query parame
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes(array[GameWithId1,GameWithId2,GameWithId3])
+
+    + Attributes(array[Game])
 
 ## Single Game [/api/games/{id}]
 + Parameters
@@ -113,12 +142,13 @@ This operation updates a game in the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes (Game1)
+    + Attributes (Game)
 
 + Response 204
     + Headers
 
                  Location: /api/members/id
+
 ### Remove Game [DELETE]
 +  Request
     + Headers
@@ -137,29 +167,29 @@ This operation adds a game session to the collection.
     + Headers
 
                  Authorization: 1234Example
-    + Attributes(array[Session])
+
+   + Attributes(array[BaseSession])
 
 + Response 201 (application/json)
     + Headers
 
                  Location: /api/members/id
-    + Attributes
-        + id: 1 (number) - Id of session.
 
 ### Get Session [GET /api/sessions{?pageSize,pageStart}]
 This operation returns a list of sessions from the collection.
 May be filtered with query parameters.
 + Parameters
-    + pageSize: 10 (number, optional)
-    + pageStart: 5 (number, optional)
-        + Default: 0
+    + pageSize: 0 (number, optional)
+    + pageStart: 0 (number, optional)
+
 +  Request
     + Headers
 
                  Authorization: 1234Example
 
 + Response 200 (application/json)
-    + Attributes(array[SessionWithId])
+
+    + Attributes(array[Session])
 
 
 # Single Session [/api/sessions/{id}]
@@ -182,101 +212,49 @@ Sign up for an API key to access the routes.
 
 # Data Structures
 
-## Endpoint
-- games: /api/games (string, required)
-- sessions: /api/sessions (string, required)
-- members: /api/members (string, required)
+## BaseMember (object)
+- firstName: Jens (string, required) - First name of the member.
+- lastName: Johnny (string, required) - Last name of the member.
 
-## MemberWithStats1
-- include MemberWithId1
-- wins: 10 (number, required)
-- winRatio: 0.90 (number, required)
-- losses: 100 (number, required)
-- timesTraitor: 9000 (number, required)
-- gamesPlayed: 9010 (number, required)
+## Sample
+- firstName: Ola (string, required)
+- lastName: Conny (string, required)
 
-## MemberWithStats2
-- include MemberWithId2
-- wins: 10 (number, required)
-- winRatio: 0.90 (number, required)
-- losses: 100 (number, required)
-- timesTraitor: 9000 (number, required)
-- gamesPlayed: 9010 (number, required)
+## Id
+- id: 1 (string, required) - Identiier of the entity.
 
-## MemberWithStats3
-- include MemberWithId3
-- wins: 10 (number, required)
-- winRatio: 0.90 (number, required)
-- losses: 100 (number, required)
-- timesTraitor: 9000 (number, required)
-- gamesPlayed: 9010 (number, required)
+## Sample
+- Id: 2 (string, required)
 
-## MemberWithId1 (object)
+## MemberStats
+- wins: 2 (number, required) - Number of wins member has.
+- winRatio: 0.5 (number, required) - members current win ratio.
+- losses: 2 (number, required) - Number of losses member has.
+- timesTraitor: 0 (number, required) - Times member has been the traitor.
+- gamesPlayed: 4 (number, required) Number of times member has played games.
+
+# Member (object)
 - id: 1 (number, required)
-- include Member1
+- include BaseMember
+- include MemberStats
 
-## MemberWithId2 (object)
-- id: 2 (number, required)
-- include Member2
+## BaseGame
+- name: Ticket To Ride (required) - Name of the Game.
+- maxNumOfPlayers: 6 (number, required) - The maximum number of players in the game.
+- traitor: true (boolean, required) - True if game has traitor mechanic.
+- coop: false (boolean, required) - True if game is co-op.
 
-## MemberWithId3 (object)
-- id: 3 (number, required)
-- include Member3
-
-## Member1 (object)
-- firstName: Jens (required)
-- lastName: Johnny (required)
-
-## Member2 (object)
-- firstName: Carl (required)
-- lastName:  Conny (required)
-
-## Member3 (object)
-- firstName: Lars (required)
-- lastName: Lök (required)
-
-## GameWithId1 (object)
+## Game (object)
 - id: 1 (number, required)
-- include Game1
+- include BaseGame
 
-## GameWithId2 (object)
-- id: 2 (number, required)
-- include Game2
-
-## GameWithId3 (object)
-- id: 3 (number, required)
-- include Game3
-
-## Game1 (object)
-- name: Ticket To Ride (required)
-- maxNumOfPlayers: 5 (number, required)
-- traitor: false (boolean, required)
-- coop: false (boolean, required)
-
-## Game2 (object)
-- name: Shadows over Camelot (required)
-- maxNumOfPlayers: 8 (number, required)
-- traitor: true (boolean, required)
-- coop: true (boolean, required)
-
-
-## Game3 (object)
-- name: Twilight Imperium 4 (required)
-- maxNumOfPlayers: 6 (number, required)
-- traitor: false (boolean, required)
-- coop: false (boolean, required)
-
-
-## SessionWithId (object)
-- id: 1 (number, required)
-- gamePlayed: 1 (number, required)
-- date: 20/5/2017 (string, required)
-- winners (array[number], required)
-- losers (array[number], required)
-- traitors (array[number], required)
+## BaseSession
+- gameID: 1 (number, required) - Id of played game.
+- winners: 1 (array, required) - Id of winners.
+- losers: 2 (array, required) -  Id of losers.
+- traitors: 1 (array, optional) - Id of traitors if there where any.
 
 ## Session (object)
-- gameID: 5 (number, required)
-- winners: 1 (array, required)
-- losers: 2, 3 (array, required)
-- traitors: 1 (array, optional)
+- id: 1 (number, required)
+- include BaseSession
+- date: 2018-04-27T20:06+02:00 (string, required) - Dates are generated when session is posted.
