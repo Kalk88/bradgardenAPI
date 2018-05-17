@@ -20,8 +20,8 @@ const val GAME_ID = "/api/games/:id"
 const val SESSIONS = "/api/sessions"
 const val SESSION_ID ="/api/sessions/:id"
 const val JSON ="application/json"
-const val ETAG = "eTag"
-const val IF_MODIFIED_SINCE = "If-Modified-Since"
+const val ETAG = "etag"
+const val IF_MODIFIED_SINCE = "if-modified-since"
 const val HTTP_OK = 200
 const val HTTP_CREATED = 201
 const val HTTP_NO_CONTENT = 204
@@ -42,7 +42,6 @@ class Server {
         val publicEndpoints = hashMapOf("members" to MEMBERS, "games" to GAMES, "sessions" to SESSIONS)
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val db = HerokuDb()
-        //val db = DBConnection("localhost:5432/bradgarden", "postgres", "postgres")
         //  val auth = Authorization(db)
         val repository = Repository(db.memberDao(), db.gameDao(), db.sessionDao())
         port(
