@@ -157,6 +157,7 @@ class Server {
             val game = mapper.readValue<Game>(req.body())
             repository.update(req.params(":id"), game)
             buildResponse(statusCode = HTTP_NO_CONTENT, type = "", response = res)
+            res.header("Location", "/api/games/$id")
             res.body()
         }
 
