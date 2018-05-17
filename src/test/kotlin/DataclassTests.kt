@@ -1,8 +1,7 @@
-import org.junit.Test
+import org.junit.*
+import org.junit.Assert.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class DataclassTests {
 
@@ -27,7 +26,7 @@ class DataclassTests {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
         df.timeZone = tz
         val date = df.format(Date())
-        assertEquals(date, session.date, "should be equal, can fail if hh/mm just about to change")
+        assertEquals("should be equal, can fail if hh/mm just about to change",date, session.date)
     }
 
 }
